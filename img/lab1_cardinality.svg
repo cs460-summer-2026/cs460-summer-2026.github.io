@@ -43,7 +43,7 @@
   <text class="card-rel-text" x="195" y="234" text-anchor="middle">R</text>
   <rect class="card-entity" x="280" y="210" width="70" height="40"/>
   <text class="card-label" x="315" y="235" text-anchor="middle">B</text>
-  <line class="card-line" x1="110" y1="230" x2="160" y2="230" marker-end="url(#arrow)"/>
+  <line class="card-line" x1="160" y1="230" x2="110" y2="230" marker-end="url(#arrow)"/>
   <line class="card-line" x1="230" y1="230" x2="280" y2="230"/>
 
   <!-- 1:1 (one-to-one) -->
@@ -54,12 +54,12 @@
   <text class="card-rel-text" x="575" y="234" text-anchor="middle">R</text>
   <rect class="card-entity" x="660" y="210" width="70" height="40"/>
   <text class="card-label" x="695" y="235" text-anchor="middle">B</text>
-  <line class="card-line" x1="490" y1="230" x2="540" y2="230" marker-end="url(#arrow)"/>
+  <line class="card-line" x1="540" y1="230" x2="490" y2="230" marker-end="url(#arrow)"/>
   <line class="card-line" x1="610" y1="230" x2="660" y2="230" marker-end="url(#arrow)"/>
 
   <!-- Caption / key -->
   <text class="card-rel-text" x="360" y="320" text-anchor="middle" fill="#555">
-    Arrow points to the "one" side; absence of an arrow means "many".
+    The arrow tip points at the entity with "1" in the ratio. No arrow = "many".
   </text>
   <text class="card-rel-text" x="360" y="340" text-anchor="middle" fill="#555">
     R is the relationship between entity sets A and B.
