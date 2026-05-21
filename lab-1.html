@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Boston University CS460 Introduction to Database Systems — Summer 2026 — Lab 1">
-  <title>Lab 1 — CS460 Summer 2026</title>
+  <meta name="description" content="Boston University CS460 Introduction to Database Systems, Summer 2026, Lab 1: ER Model and Relational Algebra">
+  <title>Lab 1: ER Model &amp; Relational Algebra | CS460</title>
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
@@ -19,7 +19,7 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
 
-  <meta property="og:title" content="Lab 1 — CS460 Summer 2026">
+  <meta property="og:title" content="Lab 1: ER Model &amp; Relational Algebra | CS460">
   <meta property="og:type" content="article">
 </head>
 
@@ -66,7 +66,7 @@
 
   <!-- ===== Hero ===== -->
   <header class="hero">
-    <h1 class="hero__title">Lab 1</h1>
+    <h1 class="hero__title hero__title--lab">Lab 1<span class="hero__subtitle">ER Model &amp; Relational Algebra</span></h1>
   </header>
 
   <!-- ===== Main ===== -->
@@ -76,10 +76,12 @@
     <aside class="toc" aria-label="Table of contents">
       <p class="toc__label">On this page</p>
       <ul class="toc__list">
-        <li><a href="#overview">1. Overview</a></li>
-        <li><a href="#concepts">2. Concepts</a></li>
-        <li><a href="#walkthrough">3. Walkthrough</a></li>
-        <li><a href="#examples">4. Examples</a></li>
+        <li><a href="#er-model">1. ER Model</a></li>
+        <li><a href="#er-exercise">2. ER Model Exercise</a></li>
+        <li><a href="#er-translation">3. ER to Schema Translation</a></li>
+        <li><a href="#ra">4. Relational Algebra</a></li>
+        <li><a href="#ra-examples">5. RA Examples</a></li>
+        <li><a href="#relax">6. RelaX Exercises</a></li>
       </ul>
     </aside>
 
@@ -89,46 +91,439 @@
       <details class="toc-mobile">
         <summary>On this page ▾</summary>
         <ul>
-          <li><a href="#overview">1. Overview</a></li>
-          <li><a href="#concepts">2. Concepts</a></li>
-          <li><a href="#walkthrough">3. Walkthrough</a></li>
-          <li><a href="#examples">4. Examples</a></li>
+          <li><a href="#er-model">1. ER Model</a></li>
+          <li><a href="#er-exercise">2. ER Model Exercise</a></li>
+          <li><a href="#er-translation">3. ER to Schema Translation</a></li>
+          <li><a href="#ra">4. Relational Algebra</a></li>
+          <li><a href="#ra-examples">5. RA Examples</a></li>
+          <li><a href="#relax">6. RelaX Exercises</a></li>
         </ul>
       </details>
 
-      <section id="overview" class="lab-section">
-        <h2 class="section-title">1. Overview</h2>
+      <!-- ============================================
+           SECTION 1 — ER MODEL
+           ============================================ -->
+      <section id="er-model" class="lab-section">
+        <h2 class="section-title">1. ER Model</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Concept</th><th>Symbol</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Entity</td>        <td>Rectangle</td>                          <td>A real-world object in the database</td></tr>
+                <tr><td>Entity Set</td>    <td>Rectangle</td>                          <td>A collection of similar entities</td></tr>
+                <tr><td>Weak Entity</td>   <td>Rectangle with a bold (double) border</td><td>Cannot be identified without an owner entity</td></tr>
+                <tr><td>Attribute</td>     <td>Ellipse</td>                            <td>A property of an entity</td></tr>
+                <tr><td>Key Attribute</td> <td>Ellipse with the label underlined</td>  <td>Uniquely identifies each entity in the set</td></tr>
+                <tr><td>Relationship</td>  <td>Diamond</td>                            <td>An association between entities</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>Total participation (bold line): every entity in the set must participate in the relationship.</p>
+          <p>Partial participation (single line): some entities may not.</p>
+
+          <p>Primary key: the minimal set of attributes that uniquely identifies a row.</p>
+          <p>Foreign key: an attribute that references the primary key of another table.</p>
+
+          <figure class="diagram">
+            <img src="img/lab1_er_basic.svg" alt="ER diagram with Artist and Song entities connected by a Records relationship diamond, with attribute circles for each entity." />
+          </figure>
+
+          <figure class="diagram">
+            <img src="img/lab1_cardinality.svg" alt="Four cardinality types: many-to-many, many-to-one, one-to-many, and one-to-one, shown with arrow notation." />
+          </figure>
+
         </div>
       </section>
 
-      <section id="concepts" class="lab-section lab-section--alt">
-        <h2 class="section-title">2. Concepts</h2>
+      <!-- ============================================
+           SECTION 2 — ER MODEL EXERCISE
+           ============================================ -->
+      <section id="er-exercise" class="lab-section lab-section--alt">
+        <h2 class="section-title">2. ER Model Exercise</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>Draw an ER diagram for the BU Music Streaming Service.</p>
+
+          <h3>Entities</h3>
+          <ul>
+            <li>Songs: <code class="inline">song_id</code> (PK), <code class="inline">title</code>, <code class="inline">genre</code>, <code class="inline">duration_sec</code>, <code class="inline">release_year</code></li>
+            <li>Artists: <code class="inline">artist_id</code> (PK), <code class="inline">name</code>, <code class="inline">country</code>, <code class="inline">debut_year</code></li>
+            <li>Users: <code class="inline">user_id</code> (PK), <code class="inline">username</code>, <code class="inline">age</code>, <code class="inline">subscription_type</code></li>
+            <li>Playlists: <code class="inline">playlist_id</code>, <code class="inline">playlist_name</code>, <code class="inline">created_date</code>. Weak Entity, identified by <code class="inline">(user_id, playlist_id)</code>.</li>
+          </ul>
+
+          <h3>Relationships</h3>
+          <ol>
+            <li>Records. Artist to Song, many-to-many, attribute: <code class="inline">recording_date</code>.</li>
+            <li>Listens. User to Song, many-to-many, attribute: <code class="inline">listen_timestamp</code>.</li>
+            <li>Owns. User to Playlist, one-to-many, total participation on Playlist side.</li>
+            <li>Contains. Playlist to Song, many-to-many, attribute: <code class="inline">date_added</code>.</li>
+          </ol>
+
+          <aside class="callout">
+            <span class="callout__label">Discussion</span>
+            <p>Is Users' participation in Listens total or partial? Why?</p>
+            <p>What should happen to a Playlist when its owner User is deleted?</p>
+            <p>Could "Record Label" (Sony, Universal) be its own entity? What relationships would it have?</p>
+          </aside>
+
         </div>
       </section>
 
-      <section id="walkthrough" class="lab-section">
-        <h2 class="section-title">3. Walkthrough</h2>
+      <!-- ============================================
+           SECTION 3 — ER TO SCHEMA TRANSLATION
+           ============================================ -->
+      <section id="er-translation" class="lab-section">
+        <h2 class="section-title">3. ER to Schema Translation</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>Each ER construct maps to SQL using four rules.</p>
+
+          <h3>Rule 1. Strong entity becomes a table</h3>
+<pre><code class="language-sql">CREATE TABLE Songs (
+    song_id      INTEGER PRIMARY KEY,
+    title        VARCHAR(200),
+    genre        VARCHAR(50),
+    duration_sec INTEGER,
+    release_year INTEGER
+);</code></pre>
+          <p>Attributes become columns; the key becomes <code class="inline">PRIMARY KEY</code>.</p>
+
+          <h3>Rule 2. Many-to-many becomes a bridge table</h3>
+<pre><code class="language-sql">CREATE TABLE Records (
+    artist_id      INTEGER,
+    song_id        INTEGER,
+    recording_date DATE,
+    PRIMARY KEY (artist_id, song_id),
+    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+    FOREIGN KEY (song_id)   REFERENCES Songs(song_id)
+);</code></pre>
+          <p>A third table stores the pairs. The composite key <code class="inline">(artist_id, song_id)</code> lets a song have multiple artists. Relationship attributes like <code class="inline">recording_date</code> live in this bridge table.</p>
+
+          <h3>Rule 3. Many-to-one becomes a foreign key column</h3>
+          <p>Add a column on the many side that points to the one side. For example, add <code class="inline">album_id</code> to Songs.</p>
+
+          <h3>Rule 4. Total participation becomes NOT NULL</h3>
+          <p>Mark the foreign key <code class="inline">NOT NULL</code> so every entity must participate.</p>
+
         </div>
       </section>
 
-      <section id="examples" class="lab-section lab-section--alt">
-        <h2 class="section-title">4. Examples</h2>
+      <!-- ============================================
+           SECTION 4 — RELATIONAL ALGEBRA
+           ============================================ -->
+      <section id="ra" class="lab-section lab-section--alt">
+        <h2 class="section-title">4. Relational Algebra</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
-          <p>Sample SQL &mdash; illustrates the styling for code blocks:</p>
-<pre><code class="language-sql">-- Find every film directed by the same person who acted in it
-SELECT f.title, d.name AS director
-FROM   film       AS f
-JOIN   director   AS d ON d.id = f.director_id
-JOIN   acts_in    AS a ON a.film_id = f.id
-WHERE  a.actor_id = d.id
-ORDER  BY f.title;</code></pre>
+
+          <h3>Basic Operators</h3>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Operator</th><th>Notation</th><th>What it does</th><th>SQL equivalent</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Selection</td>      <td class="mono">σ<sub>condition</sub>(R)</td> <td>Filters rows</td>                                <td><code class="inline">WHERE</code></td></tr>
+                <tr><td>Projection</td>     <td class="mono">π<sub>attrs</sub>(R)</td>     <td>Keeps columns; removes duplicates</td>          <td><code class="inline">SELECT DISTINCT</code></td></tr>
+                <tr><td>Cross-Product</td>  <td class="mono">R × S</td>                    <td>Every row of R paired with every row of S</td> <td><code class="inline">FROM R, S</code></td></tr>
+                <tr><td>Set-Difference</td> <td class="mono">R − S</td>                    <td>Rows in R but not in S</td>                     <td><code class="inline">EXCEPT</code></td></tr>
+                <tr><td>Union</td>          <td class="mono">R ∪ S</td>                    <td>All rows from R and S; removes duplicates</td> <td><code class="inline">UNION</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Compound Operators</h3>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Operator</th><th>Shorthand for</th><th>When to use</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Intersection R ∩ S</td>          <td class="mono">R − (R − S)</td>                                                 <td>Rows in both</td></tr>
+                <tr><td>Natural Join R ⋈ S</td>          <td class="mono">Cross-product + select on shared attrs</td>                     <td>Reconnect normalized tables</td></tr>
+                <tr><td>Theta-Join R ⋈<sub>c</sub> S</td><td class="mono">σ<sub>c</sub>(R × S)</td>                                       <td>Join on any condition</td></tr>
+                <tr><td>Division A / B</td>              <td class="mono">π<sub>x</sub>(A) − π<sub>x</sub>((π<sub>x</sub>(A) × B) − A)</td><td>"For all" queries</td></tr>
+                <tr><td>Rename ρ(New, R)</td>            <td>n/a</td>                                                                     <td>Rename table or columns</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>Selection never needs duplicate elimination because it only removes rows and cannot make two distinct rows look the same.</p>
+          <p>Real SQL engines use bags by default, so duplicates survive unless you use <code class="inline">DISTINCT</code> explicitly.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           SECTION 5 — RA EXAMPLES
+           ============================================ -->
+      <section id="ra-examples" class="lab-section">
+        <h2 class="section-title">5. Relational Algebra Examples</h2>
+        <div class="section-body">
+
+          <h3>Data</h3>
+
+          <div class="data-grid">
+            <figure>
+              <figcaption>SONGS</figcaption>
+              <div class="data-table-wrap">
+                <table class="data-table data-table--compact">
+                  <thead><tr><th>song_id</th><th>title</th><th>album</th><th>genre</th></tr></thead>
+                  <tbody>
+                    <tr><td>1</td> <td>Make Them Cry</td>      <td>Iceman</td>         <td>Rap</td></tr>
+                    <tr><td>2</td> <td>Dust</td>               <td>Iceman</td>         <td>Rap</td></tr>
+                    <tr><td>3</td> <td>Ran To Atlanta</td>     <td>Iceman</td>         <td>Rap</td></tr>
+                    <tr><td>4</td> <td>National Treasures</td> <td>Iceman</td>         <td>Rap</td></tr>
+                    <tr><td>5</td> <td>What Did I Miss</td>    <td>Iceman</td>         <td>Rap</td></tr>
+                    <tr><td>6</td> <td>Rusty Intro</td>        <td>Habibti</td>        <td>RnB</td></tr>
+                    <tr><td>7</td> <td>WNBA</td>               <td>Habibti</td>        <td>RnB</td></tr>
+                    <tr><td>8</td> <td>Slap The City</td>      <td>Habibti</td>        <td>Afrobeats</td></tr>
+                    <tr><td>9</td> <td>High Fives</td>         <td>Habibti</td>        <td>RnB</td></tr>
+                    <tr><td>10</td><td>Classic</td>            <td>Habibti</td>        <td>RnB</td></tr>
+                    <tr><td>11</td><td>Princess</td>           <td>Maid of Honour</td> <td>Dance</td></tr>
+                    <tr><td>12</td><td>Cheetah Print</td>      <td>Maid of Honour</td> <td>Dance</td></tr>
+                    <tr><td>13</td><td>Which One</td>          <td>Maid of Honour</td> <td>Rap</td></tr>
+                    <tr><td>14</td><td>Amazing Shape</td>      <td>Maid of Honour</td> <td>Dancehall</td></tr>
+                    <tr><td>15</td><td>Road Trips</td>         <td>Maid of Honour</td> <td>RnB</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </figure>
+
+            <figure>
+              <figcaption>FEATURES</figcaption>
+              <div class="data-table-wrap">
+                <table class="data-table data-table--compact">
+                  <thead><tr><th>song_id</th><th>artist</th></tr></thead>
+                  <tbody>
+                    <tr><td>3</td> <td>Future</td></tr>
+                    <tr><td>3</td> <td>Molly Santana</td></tr>
+                    <tr><td>9</td> <td>Sexyy Red</td></tr>
+                    <tr><td>12</td><td>Sexyy Red</td></tr>
+                    <tr><td>13</td><td>Central Cee</td></tr>
+                    <tr><td>14</td><td>Popcaan</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </figure>
+          </div>
+
+          <h3>Questions</h3>
+
+          <div class="query-card">
+            <span class="query-card__label">Q1</span>
+            <p class="query-card__question">Find the titles of all songs on Iceman.</p>
+            <details>
+              <summary>Answer</summary>
+              <code class="ra">π<sub>title</sub>(σ<sub>album = 'Iceman'</sub>(SONGS))</code>
+              <div class="answer">Make Them Cry, Dust, Ran To Atlanta, National Treasures, What Did I Miss</div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Q2</span>
+            <p class="query-card__question">Find the titles of all RnB songs.</p>
+            <details>
+              <summary>Answer</summary>
+              <code class="ra">π<sub>title</sub>(σ<sub>genre = 'RnB'</sub>(SONGS))</code>
+              <div class="answer">Rusty Intro, WNBA, High Fives, Classic, Road Trips</div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Q3</span>
+            <p class="query-card__question">Find the titles of songs that have a featured artist.</p>
+            <details>
+              <summary>Answer</summary>
+              <code class="ra">π<sub>title</sub>(SONGS ⋈ FEATURES)</code>
+              <div class="answer">Ran To Atlanta, High Fives, Cheetah Print, Which One, Amazing Shape</div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Q4</span>
+            <p class="query-card__question">Find the title of the song Central Cee appears on.</p>
+            <details>
+              <summary>Answer</summary>
+              <code class="ra">π<sub>title</sub>(σ<sub>artist = 'Central Cee'</sub>(FEATURES) ⋈ SONGS)</code>
+              <div class="answer">Which One</div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Q5</span>
+            <p class="query-card__question">Find all artists featured on Iceman or Habibti.</p>
+            <details>
+              <summary>Answer</summary>
+              <code class="ra">π<sub>artist</sub>(FEATURES ⋈ σ<sub>album = 'Iceman'</sub>(SONGS))
+  ∪
+π<sub>artist</sub>(FEATURES ⋈ σ<sub>album = 'Habibti'</sub>(SONGS))</code>
+              <div class="answer">Future, Molly Santana, Sexyy Red</div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Q6</span>
+            <p class="query-card__question">Find artists featured on both Habibti and Maid of Honour.</p>
+            <details>
+              <summary>Answer</summary>
+              <code class="ra">π<sub>artist</sub>(FEATURES ⋈ σ<sub>album = 'Habibti'</sub>(SONGS))
+  ∩
+π<sub>artist</sub>(FEATURES ⋈ σ<sub>album = 'Maid of Honour'</sub>(SONGS))</code>
+              <div class="answer">Sexyy Red</div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Q7</span>
+            <p class="query-card__question">Find titles of songs with no featured artist.</p>
+            <details>
+              <summary>Answer</summary>
+              <code class="ra">π<sub>title</sub>(SONGS) − π<sub>title</sub>(SONGS ⋈ FEATURES)</code>
+              <div class="answer">Dust, Make Them Cry, National Treasures, What Did I Miss, WNBA, Slap The City, Classic, Rusty Intro, Princess, Road Trips</div>
+            </details>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           SECTION 6 — RELAX EXERCISES
+           ============================================ -->
+      <section id="relax" class="lab-section lab-section--alt">
+        <h2 class="section-title">6. RelaX Exercises</h2>
+        <div class="section-body">
+
+          <a class="btn-link" href="https://dbis-uibk.github.io/relax/" target="_blank" rel="noopener">
+            Open RelaX
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 3h7v7"></path>
+              <path d="M10 14L21 3"></path>
+              <path d="M21 14v7H3V3h7"></path>
+            </svg>
+          </a>
+          <p>Runs in your browser. No account needed.</p>
+
+          <h3>Setup</h3>
+          <p>Paste into the RelaX Group Editor:</p>
+
+          <div class="code-block">
+            <button class="code-copy" type="button" data-copy-target="relax-dataset" aria-label="Copy dataset">Copy</button>
+<pre id="relax-dataset"><code class="language-none">group: CS460 Lab 1
+
+Songs = {
+song_id:number, title:string, album:string, genre:string
+1, 'Make Them Cry', 'Iceman', 'Rap'
+2, 'Dust', 'Iceman', 'Rap'
+3, 'Ran To Atlanta', 'Iceman', 'Rap'
+4, 'National Treasures', 'Iceman', 'Rap'
+5, 'What Did I Miss', 'Iceman', 'Rap'
+6, 'Rusty Intro', 'Habibti', 'RnB'
+7, 'WNBA', 'Habibti', 'RnB'
+8, 'Slap The City', 'Habibti', 'Afrobeats'
+9, 'High Fives', 'Habibti', 'RnB'
+10, 'Classic', 'Habibti', 'RnB'
+11, 'Princess', 'Maid of Honour', 'Dance'
+12, 'Cheetah Print', 'Maid of Honour', 'Dance'
+13, 'Which One', 'Maid of Honour', 'Rap'
+14, 'Amazing Shape', 'Maid of Honour', 'Dancehall'
+15, 'Road Trips', 'Maid of Honour', 'RnB'
+}
+
+Features = {
+song_id:number, artist:string
+3, 'Future'
+3, 'Molly Santana'
+9, 'Sexyy Red'
+12, 'Sexyy Red'
+13, 'Central Cee'
+14, 'Popcaan'
+}</code></pre>
+          </div>
+
+          <h3>Syntax reference</h3>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Operation</th><th>Syntax</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Selection</td>      <td class="mono">σ genre = 'Rap' (Songs)</td></tr>
+                <tr><td>Projection</td>     <td class="mono">π title (Songs)</td></tr>
+                <tr><td>Natural Join</td>   <td class="mono">Songs ⋈ Features</td></tr>
+                <tr><td>Cross Product</td>  <td class="mono">Songs × Features</td></tr>
+                <tr><td>Union</td>          <td class="mono">A ∪ B</td></tr>
+                <tr><td>Set Difference</td> <td class="mono">A except B</td></tr>
+                <tr><td>Rename columns</td> <td class="mono">ρ new1←old1, new2←old2 (Songs)</td></tr>
+                <tr><td>String values</td>  <td class="mono">Single quotes: album = 'Iceman'</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>Can't type σ or π? Use <code class="inline">sigma</code>, <code class="inline">pi</code>, <code class="inline">join</code>, <code class="inline">cross join</code>, <code class="inline">union</code>, <code class="inline">except</code> as text alternatives.</p>
+
+          <h3>Queries</h3>
+
+          <div class="query-card">
+            <span class="query-card__label">R1</span>
+            <code class="ra">π title (σ album = 'Iceman' (Songs))</code>
+            <p>Verify this matches Q1 from Section 5.</p>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">R2</span>
+            <p class="query-card__question">Run <code class="inline">π genre (Songs)</code> and count the rows.</p>
+            <code class="ra">π genre (Songs)</code>
+            <p>15 songs, but only a handful of distinct genres. This is projection's duplicate elimination.</p>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">R3</span>
+            <p class="query-card__question">Build the multi-step query for songs with features, one step at a time.</p>
+            <code class="ra">-- Step 1
+σ album = 'Habibti' (Songs)
+
+-- Step 2
+(σ album = 'Habibti' (Songs)) ⋈ Features
+
+-- Step 3
+π artist ((σ album = 'Habibti' (Songs)) ⋈ Features)</code>
+            <p>Each step is an intermediate result in a query plan. This is what a database engine evaluates when it runs a JOIN.</p>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">R4</span>
+            <code class="ra">π title (Songs) except π title (Songs ⋈ Features)</code>
+            <p>Verify against Q7.</p>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">R5</span>
+            <p class="query-card__question">Run both and compare row counts.</p>
+            <code class="ra">Songs × Features
+Songs ⋈ Features</code>
+            <p>15 x 6 = 90 rows vs 6 rows. The 84 extra rows in the cross product are pairings that mean nothing, like Dust paired with Popcaan.</p>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">R6</span>
+            <p class="query-card__question">Run each query one at a time. Paste only one expression into the editor before hitting Execute.</p>
+            <code class="ra">-- Step 1: self-join with no renaming
+Features ⋈ Features
+
+-- Step 2: rename both columns (renamed copy alone)
+ρ song_id2←song_id, artist2←artist (Features)
+
+-- Step 3: rename only one column, then join with the original
+Features ⋈ (ρ artist2←artist (Features))</code>
+            <p>Step 1 gives back the original Features table because joining a table with itself on shared attributes is a no-op. Step 2 just produces the renamed copy with no joining. Step 3 is the useful pattern: keep <code class="inline">song_id</code> the same so it joins, but rename <code class="inline">artist</code> so each row pairs two artists who appear on the same song. This is how you write queries like "find songs featuring two different artists."</p>
+          </div>
+
         </div>
       </section>
 

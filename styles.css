@@ -281,6 +281,27 @@ body[data-page="lab"]  .nav__dropdown > summary {
   text-shadow: 0 2px 12px rgba(0,0,0,0.25);
 }
 
+/* Lab-page hero variant: keep the big number, render the topic small below */
+.hero__title--lab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  line-height: 1;
+}
+.hero__subtitle {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: clamp(1rem, 2.2vw, 1.4rem);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.25);
+  max-width: 800px;
+  padding: 0 var(--space-3);
+  line-height: 1.2;
+}
+
 /* ============================================================
    PAGE LAYOUT
    ============================================================ */
@@ -568,6 +589,292 @@ pre[class*="language-"] {
 .token.function,
 .token.class-name { color: var(--color-brick-dark) !important; }
 .token.punctuation { color: var(--color-ink-muted) !important; }
+
+/* ============================================================
+   DATA TABLES (lab content)
+   ============================================================ */
+.section-body .data-table-wrap {
+  overflow-x: auto;
+  margin: 0 0 var(--space-4);
+}
+
+.section-body table.data-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+}
+
+.section-body table.data-table thead th {
+  text-align: left;
+  background: var(--color-stone);
+  color: var(--color-ink);
+  font-weight: 600;
+  font-size: var(--text-tiny);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--color-rule);
+}
+
+.section-body table.data-table tbody td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--color-rule);
+  vertical-align: top;
+}
+
+.section-body table.data-table tbody tr:last-child td { border-bottom: none; }
+
+.section-body table.data-table tbody tr:nth-child(even) td {
+  background: var(--color-cream);
+}
+
+/* Compact variant for short reference tables */
+.section-body table.data-table--compact thead th,
+.section-body table.data-table--compact tbody td {
+  padding: 6px 10px;
+  font-size: var(--text-tiny);
+}
+
+/* Tables containing math/notation render in mono */
+.section-body table.data-table .mono,
+.section-body table.data-table td.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-tiny);
+}
+
+/* Inline ER symbol shapes inside the reference table */
+.section-body .sym {
+  width: 60px;
+  height: 28px;
+  display: inline-block;
+}
+
+/* Task prompt line (e.g., "Write the bridge table for Listens yourself.") */
+.section-body p.task {
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-cream);
+  padding: var(--space-2) var(--space-3);
+  font-weight: 500;
+  color: var(--color-ink);
+  margin: 0 0 var(--space-4);
+}
+
+/* Stacked-data wrap: lets multiple small relation tables sit side-by-side on wide screens */
+.section-body .data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4);
+  margin: 0 0 var(--space-4);
+}
+.section-body .data-grid figure { margin: 0; }
+.section-body .data-grid figcaption {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-tiny);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  margin-bottom: var(--space-2);
+}
+
+/* ============================================================
+   CALLOUTS / NOTES
+   ============================================================ */
+.callout {
+  background: var(--color-cream);
+  border-left: 3px solid var(--color-accent);
+  padding: var(--space-3) var(--space-4);
+  margin: 0 0 var(--space-4);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.callout__label {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: var(--text-tiny);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0 0 var(--space-2);
+}
+.callout p:last-child,
+.callout ul:last-child,
+.callout ol:last-child { margin-bottom: 0; }
+.callout ul li::before { background: var(--color-brick); }
+
+/* Numbered list inside section-body — restore default-style numbering */
+.section-body ol {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 var(--space-4);
+  counter-reset: ol-counter;
+}
+.section-body ol > li {
+  position: relative;
+  padding-left: 36px;
+  margin-bottom: var(--space-2);
+  counter-increment: ol-counter;
+}
+.section-body ol > li::before {
+  content: counter(ol-counter) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-accent);
+  font-size: 1rem;
+  line-height: var(--leading-body);
+  width: 28px;
+  text-align: right;
+}
+
+/* ============================================================
+   QUERY CARDS (RA examples)
+   ============================================================ */
+.query-card {
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  margin: 0 0 var(--space-4);
+}
+.query-card__label {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+  margin-bottom: var(--space-2);
+}
+.query-card__question {
+  font-weight: 600;
+  margin: 0 0 var(--space-3);
+}
+.query-card .ra {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  background: var(--color-stone);
+  border-left: 3px solid var(--color-brick);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  margin: 0 0 var(--space-3);
+  white-space: pre-wrap;
+}
+.query-card details {
+  border-top: 1px dashed var(--color-rule);
+  padding-top: var(--space-3);
+}
+.query-card details summary {
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-small);
+  color: var(--color-accent);
+  list-style: none;
+}
+.query-card details summary::-webkit-details-marker { display: none; }
+.query-card details summary::before {
+  content: "▸  ";
+  display: inline-block;
+  transition: transform 150ms ease;
+}
+.query-card details[open] summary::before { content: "▾  "; }
+.query-card details .answer {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  color: var(--color-ink);
+}
+
+/* ============================================================
+   CODE BLOCK WITH COPY BUTTON
+   ============================================================ */
+.code-block {
+  position: relative;
+  margin: 0 0 var(--space-4);
+}
+.code-block pre {
+  margin: 0;
+}
+.code-copy {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-family: var(--font-body);
+  font-size: var(--text-tiny);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+.code-copy:hover {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+.code-copy.is-copied {
+  background: var(--color-brick);
+  color: #fff;
+  border-color: var(--color-brick);
+}
+
+/* ============================================================
+   COLAB-STYLE LINK BUTTON
+   ============================================================ */
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-accent);
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-small);
+  letter-spacing: 0.02em;
+  padding: 12px 22px;
+  border-radius: var(--radius-sm);
+  margin: 0 0 var(--space-4);
+  transition: background 150ms ease, transform 150ms ease;
+}
+.btn-link:hover {
+  background: var(--color-accent-hover);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.btn-link svg { width: 16px; height: 16px; }
+
+/* ============================================================
+   ER / CARDINALITY DIAGRAMS
+   ============================================================ */
+.diagram {
+  margin: 0 0 var(--space-4);
+  text-align: center;
+}
+.diagram svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+.diagram figcaption {
+  font-family: var(--font-body);
+  font-size: var(--text-tiny);
+  color: var(--color-ink-muted);
+  margin-top: var(--space-2);
+  letter-spacing: 0.02em;
+}
 
 /* ============================================================
    FOOTER
