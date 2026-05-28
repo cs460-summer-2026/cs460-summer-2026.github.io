@@ -74,7 +74,7 @@
       <p class="toc__label">On this page</p>
       <ul class="toc__list">
         <li><a href="#install-mysql">1. Install MySQL</a></li>
-        <li><a href="#install-shell">2. MySQL Shell</a></li>
+        <li><a href="#install-shell">2. MySQL Workbench</a></li>
         <li><a href="#install-connector">3. Python connector</a></li>
         <li><a href="#set-path">4. Set PATH</a></li>
         <li><a href="#server">5. Start the server</a></li>
@@ -92,7 +92,7 @@
         <summary>On this page ▾</summary>
         <ul>
           <li><a href="#install-mysql">1. Install MySQL</a></li>
-          <li><a href="#install-shell">2. MySQL Shell</a></li>
+          <li><a href="#install-shell">2. MySQL Workbench</a></li>
           <li><a href="#install-connector">3. Python connector</a></li>
           <li><a href="#set-path">4. Set PATH</a></li>
           <li><a href="#server">5. Start the server</a></li>
@@ -131,16 +131,21 @@ sudo mysql_secure_installation</code></pre>
       </section>
 
       <section id="install-shell" class="lab-section lab-section--alt">
-        <h2 class="section-title">2. MySQL Shell</h2>
+        <h2 class="section-title">2. MySQL Workbench</h2>
         <div class="section-body">
 
-          <p>MySQL Shell is the modern client. Workbench still works if you prefer it, but we use the shell plus a VS Code extension in this course.</p>
+          <p>Workbench is the official GUI. You write SQL in an editor, click run, see results in a grid. We use it for every lab from here on.</p>
 
-          <p>On macOS:</p>
-<pre><code class="language-bash">brew install mysql-shell</code></pre>
-          <p>On Linux, grab the package from <a href="https://dev.mysql.com/downloads/shell/" target="_blank" rel="noopener">dev.mysql.com/downloads/shell</a>. On Windows, Developer Default already installed it.</p>
+          <p>Download from <a href="https://dev.mysql.com/downloads/workbench/" target="_blank" rel="noopener">dev.mysql.com/downloads/workbench</a>.</p>
 
-          <p>For a GUI, install the <em>MySQL Shell for VS Code</em> extension. Open VS Code, search the Extensions panel for it, install the one by Oracle. A database icon appears in the sidebar.</p>
+          <h3>macOS</h3>
+          <p>Open the DMG and drag MySQL Workbench into Applications. If macOS refuses to open it because it's from an "unidentified developer", go to <em>System Settings → Privacy &amp; Security</em>, scroll down, and click <em>Open Anyway</em>.</p>
+
+          <h3>Linux</h3>
+          <p>Install from the .deb on the download page, or via your package manager.</p>
+
+          <h3>Windows</h3>
+          <p>If you chose <em>Developer Default</em> in Section 1, Workbench is already installed. Otherwise download the MSI from the link above.</p>
 
         </div>
       </section>
@@ -216,14 +221,13 @@ net stop MySQL</code></pre>
         <h2 class="section-title">6. Connect</h2>
         <div class="section-body">
 
-          <p>In a terminal:</p>
+          <p>Open MySQL Workbench. On the home screen you'll see a tile labeled <em>Local instance 3306</em> (or similar). Click it.</p>
+
+          <p>Workbench prompts for the root password. Type the one you set in Section 1 (or leave it blank if you didn't set one) and click OK. You should land in the SQL editor with a sidebar showing schemas on the left.</p>
+
+          <p>If you'd rather use the terminal, run:</p>
 <pre><code class="language-bash">mysql -u root -h 127.0.0.1 -p</code></pre>
-
-          <p><code class="inline">-u</code> is the user, <code class="inline">-h</code> is the host (your laptop), <code class="inline">-p</code> prompts for the password.</p>
-
-          <p>Type the root password from Section 1. Nothing shows on screen while you type. Press Enter.</p>
-
-          <p>You should see a welcome banner and the <code class="inline">mysql&gt;</code> prompt. You are connected.</p>
+          <p>Nothing shows on screen while you type the password. Press Enter. You should see a welcome banner and the <code class="inline">mysql&gt;</code> prompt.</p>
 
         </div>
       </section>
@@ -232,7 +236,9 @@ net stop MySQL</code></pre>
         <h2 class="section-title">7. Create a database</h2>
         <div class="section-body">
 
-          <p>Run these at the <code class="inline">mysql&gt;</code> prompt.</p>
+          <p>Open MySQL Workbench. Click the default <em>Local instance</em> connection tile. Enter your password (blank if you didn't set one). You should see a SQL editor tab.</p>
+
+          <p>Paste each block below into the editor and click the lightning-bolt button (or press Cmd+Enter / Ctrl+Enter) to run.</p>
 
           <h3>Create the database</h3>
 <pre><code class="language-sql">CREATE DATABASE space_missions;
