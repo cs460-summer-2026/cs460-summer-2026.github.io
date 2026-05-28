@@ -750,6 +750,29 @@ pre[class*="language-"] {
 }
 .fixhint a { font-weight: 600; }
 
+/* Troubleshooting group headings (category dividers) */
+.section-body h3.tb-group {
+  color: var(--color-brick);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: var(--space-6) 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--color-rule);
+}
+.section-body h3.tb-group:first-child { margin-top: var(--space-3); }
+
+/* Individual troubleshooting error headings */
+.section-body h4 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-body);
+  color: var(--color-ink);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
 /* Numbered list inside section-body — restore default-style numbering */
 .section-body ol {
   list-style: none;

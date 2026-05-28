@@ -137,8 +137,10 @@ sudo mysql_secure_installation</code></pre>
             <span class="expect__label">Check it worked</span>
             <p>Open a terminal (Mac: Terminal app; Windows: PowerShell) and run:</p>
 <pre><code class="language-bash">mysql --version</code></pre>
-            <p>You should see a version number like <code class="inline">mysql Ver 9.x</code>. If you get "command not found", see <a href="#tb-path">Troubleshooting: command not found</a>.</p>
+            <p>You should see a version number like <code class="inline">mysql Ver 9.x</code>.</p>
           </div>
+
+          <p class="fixhint">Didn't work? Common Step 1 problems: <a href="#tb-arch">wrong architecture</a>, <a href="#tb-gatekeeper">macOS blocked the installer</a>, <a href="#tb-noformula">Homebrew formula not found</a>, <a href="#tb-winservice">Windows service won't start</a>, <a href="#tb-path">command not found</a>.</p>
 
         </div>
       </section>
@@ -166,6 +168,8 @@ sudo mysql_secure_installation</code></pre>
             <p>MySQL Workbench opens and shows a home screen with a "MySQL Connections" area.</p>
           </div>
 
+          <p class="fixhint">Didn't work? <a href="#tb-wb-crash">Workbench crashes on launch (Apple Silicon)</a>, <a href="#tb-wb-damaged">macOS says it's "damaged"</a>.</p>
+
         </div>
       </section>
 
@@ -191,7 +195,7 @@ sudo mysql_secure_installation</code></pre>
             <p>A new tab opens with three areas: a <strong>Navigator</strong> on the left (showing SCHEMAS), an empty <strong>SQL editor</strong> in the middle, and a <strong>results area</strong> at the bottom.</p>
           </div>
 
-          <p>Two common stumbles here: a wrong password gives <em>Access denied</em> (<a href="#tb-denied">fix</a>), and a server that isn't running gives <em>Can't connect</em> (<a href="#tb-connect">fix</a>).</p>
+          <p class="fixhint">Didn't work? <a href="#tb-denied">Access denied (wrong password)</a>, <a href="#tb-connect">can't connect (server not running)</a>, <a href="#tb-mgmt">could not acquire management access</a>, <a href="#tb-notile">no connection tile</a>, <a href="#tb-version">version warning</a>.</p>
 
         </div>
       </section>
@@ -265,6 +269,8 @@ WHERE  s.sid = m.sid
 <pre><code class="language-none">Explorer | Jupiter | Research</code></pre>
             <p>If you see that, your database is set up correctly.</p>
           </div>
+
+          <p class="fixhint">Empty result usually means the <code class="inline">INSERT</code> step (4d) didn't run, re-run it, then the query. "Table already exists" means you ran 4b twice, which is harmless.</p>
 
         </div>
       </section>
@@ -344,7 +350,7 @@ EOF</code></pre>
             <p>That one tuple means Python connected to MySQL, ran the query, and got the result back. The connector works and the lab is complete.</p>
           </div>
 
-          <p>If you get <code class="inline">No module named 'mysql'</code>, your pip and python don't match, see <a href="#tb-nomodule">Troubleshooting: No module named mysql</a>.</p>
+          <p class="fixhint">Didn't work? <a href="#tb-pep668">externally-managed-environment</a>, <a href="#tb-psexec">PowerShell blocks venv activation</a>, <a href="#tb-nomodule">No module named 'mysql'</a>, <a href="#tb-crypto">cryptography is required</a>, <a href="#tb-rsa">caching_sha2_password / RSA key</a>, <a href="#tb-rtf">file not found (TextEdit .rtf)</a>, <a href="#tb-pwblank">access denied from Python only</a>.</p>
 
         </div>
       </section>
@@ -375,25 +381,55 @@ EOF</code></pre>
         <h2 class="section-title">Troubleshooting</h2>
         <div class="section-body">
 
-          <p>Find your error message below, your issue is most likely one of these. If you've gone through it and you're still stuck, feel free to ask.</p>
+          <p>Find your error below. It's grouped by which step you're on. Your issue is almost certainly here, and the fix is short. If you've worked through it and you're still stuck, feel free to ask.</p>
 
-          <h3 id="tb-path">"command not found: mysql"</h3>
-          <p>MySQL is installed but your terminal doesn't know where it is. You need to add it to your PATH.</p>
+          <!-- ===== INSTALL ===== -->
+          <h3 class="tb-group">Installing MySQL (Step 1)</h3>
+
+          <h4 id="tb-arch">"MySQL can't be installed on this computer" / installer won't run</h4>
+          <p>You downloaded the wrong architecture. On a Mac, ARM64 is for Apple Silicon (M1 through M4) and x86 is for older Intel Macs. Check yours under Apple menu → About This Mac → "Chip", then download the matching DMG.</p>
+
+          <h4 id="tb-gatekeeper">macOS: "cannot be opened because Apple cannot check it for malicious software"</h4>
+          <p>macOS Gatekeeper is blocking an unsigned installer. Go to <em>System Settings → Privacy &amp; Security</em>, scroll to the Security section, and click <strong>Open Anyway</strong>, then confirm. Re-run the installer.</p>
+
+          <h4 id="tb-noformula">Homebrew: "No available formula with the name 'mysql'"</h4>
+          <p>Your Homebrew is out of date. Update it and try again:</p>
+<pre><code class="language-bash">brew update
+brew install mysql</code></pre>
+
+          <h4 id="tb-winservice">Windows: "Could not start the service MySQL" during install</h4>
+          <p>Usually a leftover from a previous MySQL install, or the service name is taken. In the MySQL Installer, remove any old MySQL products, reboot, and reinstall. If it persists, give the service a fresh name (for example <code class="inline">MySQL84</code>) on the configuration screen.</p>
+
+          <h4 id="tb-path">"command not found: mysql" (terminal can't find it)</h4>
+          <p>MySQL is installed but not on your PATH. This only matters if you use the terminal; Workbench works either way.</p>
           <p class="os-tag">macOS (DMG install)</p>
 <pre><code class="language-bash">echo 'export PATH="/usr/local/mysql/bin:$PATH"' &gt;&gt; ~/.zshrc
 source ~/.zshrc</code></pre>
           <p class="os-tag">macOS (Homebrew)</p>
-          <p>Should already be on PATH. If not, run <code class="inline">eval "$(/opt/homebrew/bin/brew shellenv)"</code> and open a new terminal.</p>
+          <p>Should already be on PATH. If not, run this and open a new terminal:</p>
+<pre><code class="language-bash">echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' &gt;&gt; ~/.zprofile</code></pre>
           <p class="os-tag">Windows</p>
           <p>Search "Environment Variables" → Edit the system environment variables → Environment Variables → under System variables select <code class="inline">Path</code> → Edit → New → add <code class="inline">C:\Program Files\MySQL\MySQL Server 8.4\bin</code> → OK out. <strong>Open a fresh terminal afterward.</strong></p>
 
-          <h3 id="tb-version">Yellow warning: "Incompatible/nonstandard server version (9.x)"</h3>
-          <p>Workbench was last updated for MySQL 8.0, but your server is 9.x. Everything you do in this course works fine. Click OK and continue. Only advanced migration features are affected, which we never use.</p>
+          <!-- ===== WORKBENCH ===== -->
+          <h3 class="tb-group">Opening MySQL Workbench (Step 2)</h3>
 
-          <h3 id="tb-denied">"ERROR 1045: Access denied for user 'root'"</h3>
-          <p>Wrong password. Retype the one you set in Step 1. If you genuinely forgot it, the simplest fix is to uninstall and reinstall MySQL, setting a password you'll remember this time.</p>
+          <h4 id="tb-wb-crash">Workbench crashes on launch or when opening a diagram (Apple Silicon)</h4>
+          <p>Older Workbench builds crash on M-series Macs. Install the latest version from <a href="https://dev.mysql.com/downloads/workbench/" target="_blank" rel="noopener">the download page</a>, that fixes it for most people. If a fresh install still crashes, the terminal client (Step 6 alternative) works as a fallback.</p>
 
-          <h3 id="tb-connect">"Can't connect to MySQL server on '127.0.0.1'"</h3>
+          <h4 id="tb-wb-damaged">macOS: Workbench "is damaged and can't be opened"</h4>
+          <p>Gatekeeper again. Same fix as the installer: <em>System Settings → Privacy &amp; Security → Open Anyway</em>. If macOS won't show the button, re-download from the official link above rather than a mirror.</p>
+
+          <!-- ===== CONNECTING ===== -->
+          <h3 class="tb-group">Connecting to the server (Step 3)</h3>
+
+          <h4 id="tb-version">Yellow warning: "Incompatible / nonstandard server version (9.x)"</h4>
+          <p>Workbench was last built for MySQL 8.0, your server is newer. Everything in this course works fine. Click OK and continue. Only advanced migration features are affected, which we never use.</p>
+
+          <h4 id="tb-denied">"ERROR 1045: Access denied for user 'root'"</h4>
+          <p>Wrong password. Retype the one you set in Step 1, watching for caps lock. If you installed with Homebrew and never set one, leave the field blank. If you genuinely forgot it, the simplest fix in a lab setting is to uninstall and reinstall MySQL with a password you'll remember.</p>
+
+          <h4 id="tb-connect">"Can't connect to MySQL server on '127.0.0.1'"</h4>
           <p>The server isn't running. Start it:</p>
           <p class="os-tag">macOS (Homebrew)</p>
 <pre><code class="language-bash">brew services start mysql</code></pre>
@@ -404,22 +440,57 @@ source ~/.zshrc</code></pre>
           <p class="os-tag">Windows</p>
 <pre><code class="language-bash">net start MySQL</code></pre>
 
-          <h3 id="tb-pep668">"error: externally-managed-environment"</h3>
-          <p>Your Python refuses to install libraries system-wide to protect itself. This is exactly what the virtual environment in Step 5a is for. Make sure your prompt shows <code class="inline">(cs460env)</code> before running pip. If it doesn't, run the activate command again:</p>
+          <h4 id="tb-mgmt">Workbench: "Could not acquire management access for administration"</h4>
+          <p>Workbench connected to the database but can't manage the server process, usually because the connection's settings don't match how the server actually runs. For this lab you don't need management access, you can dismiss it and still run SQL. If you want it gone, edit the connection (the wrench/"Manage Connections") and make sure Hostname is <code class="inline">127.0.0.1</code> and Port is <code class="inline">3306</code>.</p>
+
+          <h4 id="tb-notile">No "Local instance" tile on the Workbench home screen</h4>
+          <p>Create the connection by hand. Click the "+" next to MySQL Connections and fill in: Hostname <code class="inline">127.0.0.1</code>, Port <code class="inline">3306</code>, Username <code class="inline">root</code>. Click "Test Connection", then OK.</p>
+
+          <h4 id="tb-1130">"ERROR 1130: Host is not allowed to connect to this MySQL server"</h4>
+          <p>You're connecting from a host the server doesn't permit. Use <code class="inline">127.0.0.1</code> as the host (not your machine name or an external IP). For a local lab this is all you need.</p>
+
+          <!-- ===== PYTHON ===== -->
+          <h3 class="tb-group">Python connector (Step 5)</h3>
+
+          <h4 id="tb-pep668">"error: externally-managed-environment"</h4>
+          <p>Your Python blocks system-wide installs to protect itself. This is exactly why we use a virtual environment. Make sure your prompt shows <code class="inline">(cs460env)</code> before running pip. If it doesn't, activate it again:</p>
 <pre><code class="language-bash">source cs460env/bin/activate    # macOS / Linux
 cs460env\Scripts\activate       # Windows</code></pre>
 
-          <h3 id="tb-nomodule">"ModuleNotFoundError: No module named 'mysql'"</h3>
-          <p>You installed the connector with one Python but ran the script with a different one. The fix is to install and run from inside the same virtual environment. Activate it, reinstall, then run:</p>
+          <h4 id="tb-psexec">Windows: "running scripts is disabled on this system" when activating the venv</h4>
+          <p>PowerShell blocks scripts by default. Allow them for your account, then activate again:</p>
+<pre><code class="language-bash">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></pre>
+          <p>Or sidestep it entirely by using Command Prompt (cmd) instead of PowerShell, cmd doesn't block scripts.</p>
+
+          <h4 id="tb-nomodule">"ModuleNotFoundError: No module named 'mysql'"</h4>
+          <p>You installed the connector with one Python but ran the script with a different one. Install and run from inside the <em>same</em> activated environment:</p>
 <pre><code class="language-bash">source cs460env/bin/activate
 pip install mysql-connector-python
 python test_mysql.py</code></pre>
 
-          <h3 id="tb-rtf">"can't open file … No such file or directory" (but the file exists)</h3>
-          <p>TextEdit saved your script as <code class="inline">test_mysql.py.rtf</code> instead of <code class="inline">test_mysql.py</code>. Delete it and recreate the file using the <code class="inline">cat</code> command in Step 5c, or in TextEdit choose <em>Format → Make Plain Text</em> before saving.</p>
+          <h4 id="tb-crypto">"cryptography is required for sha256_password or caching_sha2_password"</h4>
+          <p>MySQL 8+ encrypts your password with a library Python doesn't ship by default. Install it inside your environment:</p>
+<pre><code class="language-bash">pip install cryptography</code></pre>
 
-          <h3 id="tb-port">"Address already in use" (port 3306)</h3>
+          <h4 id="tb-rsa">"RSA public key is not available" / "Authentication plugin caching_sha2_password could not be loaded"</h4>
+          <p>An older connector talking to MySQL 8+ auth. Upgrade the connector inside your environment:</p>
+<pre><code class="language-bash">pip install --upgrade mysql-connector-python</code></pre>
+          <p>If it still refuses, add <code class="inline">auth_plugin='mysql_native_password'</code> to the <code class="inline">connect(...)</code> call in your script.</p>
+
+          <h4 id="tb-rtf">"can't open file … No such file or directory" (but the file is right there)</h4>
+          <p>TextEdit saved your script as <code class="inline">test_mysql.py.rtf</code> instead of <code class="inline">test_mysql.py</code>. Delete it and recreate it with the <code class="inline">cat</code> command in Step 5c, or in TextEdit choose <em>Format → Make Plain Text</em> before saving.</p>
+
+          <h4 id="tb-pwblank">Python: access denied, but Workbench connects fine</h4>
+          <p>The script's <code class="inline">password=''</code> line doesn't match your actual root password. Open <code class="inline">test_mysql.py</code> and put your password between the quotes. If your password is blank, leave it empty.</p>
+
+          <!-- ===== GENERAL ===== -->
+          <h3 class="tb-group">General</h3>
+
+          <h4 id="tb-port">"Address already in use" (port 3306)</h4>
           <p>Another MySQL server is already running. You don't need a second one. Stop the extra instance, or just connect to the one that's already up.</p>
+
+          <h4 id="tb-locked">Install fails completely on a managed / locked-down laptop</h4>
+          <p>Some work or school laptops block installers. Two fallbacks: run MySQL in Docker (<code class="inline">docker run --name cs460-mysql -e MYSQL_ROOT_PASSWORD=cs460pw -p 3306:3306 -d mysql:8.4</code>), or do today's exercises on a classmate's machine and finish the install at home before Lab 3.</p>
 
         </div>
       </section>
