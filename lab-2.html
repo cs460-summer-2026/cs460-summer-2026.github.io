@@ -74,13 +74,11 @@
       <p class="toc__label">On this page</p>
       <ul class="toc__list">
         <li><a href="#install-mysql">1. Install MySQL</a></li>
-        <li><a href="#install-shell">2. MySQL Workbench</a></li>
-        <li><a href="#install-connector">3. Python connector</a></li>
-        <li><a href="#set-path">4. Set PATH</a></li>
-        <li><a href="#server">5. Start the server</a></li>
-        <li><a href="#connect">6. Connect</a></li>
-        <li><a href="#workbench">7. Create a database</a></li>
-        <li><a href="#python">8. Python (optional)</a></li>
+        <li><a href="#install-workbench">2. Install Workbench</a></li>
+        <li><a href="#connect">3. Connect</a></li>
+        <li><a href="#database">4. Create the database</a></li>
+        <li><a href="#python">5. Python connector</a></li>
+        <li><a href="#done">You're done when…</a></li>
         <li><a href="#troubleshooting">Troubleshooting</a></li>
         <li><a href="#cheatsheet">Cheat sheet</a></li>
       </ul>
@@ -92,161 +90,127 @@
         <summary>On this page ▾</summary>
         <ul>
           <li><a href="#install-mysql">1. Install MySQL</a></li>
-          <li><a href="#install-shell">2. MySQL Workbench</a></li>
-          <li><a href="#install-connector">3. Python connector</a></li>
-          <li><a href="#set-path">4. Set PATH</a></li>
-          <li><a href="#server">5. Start the server</a></li>
-          <li><a href="#connect">6. Connect</a></li>
-          <li><a href="#workbench">7. Create a database</a></li>
-          <li><a href="#python">8. Python (optional)</a></li>
+          <li><a href="#install-workbench">2. Install Workbench</a></li>
+          <li><a href="#connect">3. Connect</a></li>
+          <li><a href="#database">4. Create the database</a></li>
+          <li><a href="#python">5. Python connector</a></li>
+          <li><a href="#done">You're done when…</a></li>
           <li><a href="#troubleshooting">Troubleshooting</a></li>
           <li><a href="#cheatsheet">Cheat sheet</a></li>
         </ul>
       </details>
 
+      <aside class="callout">
+        <span class="callout__label">Read this first</span>
+        <p>Work through the steps in order. Each step tells you what to type and what you should see afterward. If something looks different, check <a href="#troubleshooting">Troubleshooting</a> at the bottom before raising your hand. Most problems are listed there with a one-line fix.</p>
+        <p>Three things that save you grief: write down the root password you set, always open a <strong>new</strong> terminal after changing settings, and don't skip the "what you should see" checks.</p>
+      </aside>
+
+      <!-- ============================================
+           SECTION 1 - INSTALL MYSQL
+           ============================================ -->
       <section id="install-mysql" class="lab-section">
         <h2 class="section-title">1. Install MySQL</h2>
         <div class="section-body">
 
-          <p>Download MySQL 8.4 LTS from <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">dev.mysql.com/downloads/mysql</a>. You can skip the Oracle account when prompted.</p>
+          <p>This installs the database server itself. Download MySQL from <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">dev.mysql.com/downloads/mysql</a>. When Oracle asks you to sign in, scroll down and click "No thanks, just start my download".</p>
 
-          <p>The installer will ask you to set a root password. Pick something you will remember. You need it every time you connect.</p>
+          <p>Somewhere during install you will be asked to set a <strong>root password</strong>. Type one you will remember and write it down. You need it in Step 3.</p>
 
-          <h3>macOS</h3>
-          <p>Open the DMG and follow the prompts. Pick ARM 64 for Apple Silicon, x86 64 for Intel.</p>
-          <p>Or with Homebrew:</p>
+          <p class="os-tag">macOS</p>
+          <p>Pick the <strong>ARM64</strong> DMG if your Mac is Apple Silicon (M1/M2/M3/M4), or x86 if it's an older Intel Mac. Not sure? Apple menu → About This Mac → look at "Chip". Open the DMG, run the installer, keep the defaults.</p>
+          <p>If you have Homebrew, this is faster:</p>
 <pre><code class="language-bash">brew install mysql
 brew services start mysql
 mysql_secure_installation</code></pre>
+          <p>The last command sets your root password. (With Homebrew you can also just leave the password blank and press Enter at every prompt for this lab.)</p>
 
-          <h3>Linux (Ubuntu/Debian)</h3>
+          <p class="os-tag">Linux (Ubuntu/Debian)</p>
 <pre><code class="language-bash">sudo apt update
 sudo apt install mysql-server
 sudo mysql_secure_installation</code></pre>
 
-          <h3>Windows</h3>
-          <p>Download the <a href="https://dev.mysql.com/downloads/installer/" target="_blank" rel="noopener">MySQL Installer for Windows</a>. Choose <em>Developer Default</em>. That installs the server, the shell, and the Python connector together.</p>
+          <p class="os-tag">Windows</p>
+          <p>Download the <a href="https://dev.mysql.com/downloads/installer/" target="_blank" rel="noopener">MySQL Installer for Windows</a> and choose <strong>Developer Default</strong>. That installs the server, Workbench, and the Python connector in one go, so you can skip Step 2.</p>
+
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>Open a terminal (Mac: Terminal app; Windows: PowerShell) and run:</p>
+<pre><code class="language-bash">mysql --version</code></pre>
+            <p>You should see a version number like <code class="inline">mysql Ver 9.x</code>. If you get "command not found", see <a href="#tb-path">Troubleshooting: command not found</a>.</p>
+          </div>
 
         </div>
       </section>
 
-      <section id="install-shell" class="lab-section lab-section--alt">
-        <h2 class="section-title">2. MySQL Workbench</h2>
+      <!-- ============================================
+           SECTION 2 - INSTALL WORKBENCH
+           ============================================ -->
+      <section id="install-workbench" class="lab-section lab-section--alt">
+        <h2 class="section-title">2. Install MySQL Workbench</h2>
         <div class="section-body">
 
-          <p>Workbench is the official GUI. You write SQL in an editor, click run, see results in a grid. We use it for every lab from here on.</p>
+          <p>Workbench is the app you'll actually use: you type SQL in an editor, click run, and see results in a grid. Download it from <a href="https://dev.mysql.com/downloads/workbench/" target="_blank" rel="noopener">dev.mysql.com/downloads/workbench</a>.</p>
 
-          <p>Download from <a href="https://dev.mysql.com/downloads/workbench/" target="_blank" rel="noopener">dev.mysql.com/downloads/workbench</a>.</p>
+          <p class="os-tag">macOS</p>
+          <p>Open the DMG and drag MySQL Workbench into the Applications folder. The first time you open it, macOS may say it's from an "unidentified developer". If so: <em>System Settings → Privacy &amp; Security</em>, scroll to the Security section, click <strong>Open Anyway</strong>, then confirm.</p>
 
-          <h3>macOS</h3>
-          <p>Open the DMG and drag MySQL Workbench into Applications. If macOS refuses to open it because it's from an "unidentified developer", go to <em>System Settings → Privacy &amp; Security</em>, scroll down, and click <em>Open Anyway</em>.</p>
+          <p class="os-tag">Linux</p>
+          <p>Install the .deb from the download page, or use your package manager.</p>
 
-          <h3>Linux</h3>
-          <p>Install from the .deb on the download page, or via your package manager.</p>
+          <p class="os-tag">Windows</p>
+          <p>Already installed if you chose Developer Default in Step 1. Otherwise download the MSI from the link above.</p>
 
-          <h3>Windows</h3>
-          <p>If you chose <em>Developer Default</em> in Section 1, Workbench is already installed. Otherwise download the MSI from the link above.</p>
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>MySQL Workbench opens and shows a home screen with a "MySQL Connections" area.</p>
+          </div>
 
         </div>
       </section>
 
-      <section id="install-connector" class="lab-section">
-        <h2 class="section-title">3. Python connector</h2>
+      <!-- ============================================
+           SECTION 3 - CONNECT
+           ============================================ -->
+      <section id="connect" class="lab-section">
+        <h2 class="section-title">3. Connect to your server</h2>
         <div class="section-body">
 
-          <p>Check Python is installed: <code class="inline">python3 --version</code>. Then:</p>
-<pre><code class="language-bash">pip install mysql-connector-python</code></pre>
-          <p>Anaconda users:</p>
-<pre><code class="language-bash">conda install -c anaconda mysql-connector-python</code></pre>
+          <p>On the Workbench home screen you'll see a connection tile, usually labeled <strong>Local instance 3306</strong>. Double-click it.</p>
 
-          <p>Confirm it imports:</p>
-<pre><code class="language-bash">python3 -c "import mysql.connector; print(mysql.connector.__version__)"</code></pre>
-
-        </div>
-      </section>
-
-      <section id="set-path" class="lab-section lab-section--alt">
-        <h2 class="section-title">4. Set PATH</h2>
-        <div class="section-body">
-
-          <p>Run <code class="inline">mysql -V</code> in a fresh terminal. If you see a version number, skip this section.</p>
-
-          <h3>macOS (DMG install)</h3>
-<pre><code class="language-bash">echo 'export PATH="/usr/local/mysql/bin:$PATH"' &gt;&gt; ~/.zshrc
-source ~/.zshrc</code></pre>
-
-          <h3>macOS (Homebrew)</h3>
-          <p>Homebrew adds <code class="inline">/opt/homebrew/bin</code> to PATH for you on Apple Silicon. If it didn't:</p>
-<pre><code class="language-bash">echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' &gt;&gt; ~/.zprofile</code></pre>
-          <p>Open a new terminal.</p>
-
-          <h3>Windows</h3>
           <ol>
-            <li>Start → search "Environment Variables" → open <em>Edit the system environment variables</em>.</li>
-            <li>Click <em>Environment Variables</em>.</li>
-            <li>Under <em>System variables</em>, select <code class="inline">Path</code>, click <em>Edit</em>.</li>
-            <li>Click <em>New</em>, paste <code class="inline">C:\Program Files\MySQL\MySQL Server 8.4\bin</code>.</li>
-            <li>OK out of everything. Open a fresh PowerShell.</li>
+            <li>Workbench asks for the root password. Type the one you set in Step 1. If you installed with Homebrew and left it blank, leave the field empty.</li>
+            <li>Tick <strong>Save password in keychain</strong> so it stops asking.</li>
+            <li>Click OK.</li>
           </ol>
 
-        </div>
-      </section>
+          <p>You may see a yellow warning that your MySQL version is newer than Workbench officially supports. <strong>Click OK and ignore it.</strong> Everything in this lab works fine. See <a href="#tb-version">Troubleshooting: version warning</a> for the why.</p>
 
-      <section id="server" class="lab-section">
-        <h2 class="section-title">5. Start the server</h2>
-        <div class="section-body">
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>A new tab opens with three areas: a <strong>Navigator</strong> on the left (showing SCHEMAS), an empty <strong>SQL editor</strong> in the middle, and a <strong>results area</strong> at the bottom.</p>
+          </div>
 
-          <p>The installer usually starts the server for you. If Section 6 works, ignore this. Otherwise:</p>
-
-          <h3>macOS</h3>
-          <p>Homebrew install:</p>
-<pre><code class="language-bash">brew services start mysql
-brew services stop mysql</code></pre>
-          <p>DMG install: <em>System Settings → MySQL</em>, or:</p>
-<pre><code class="language-bash">sudo /usr/local/mysql/support-files/mysql.server start</code></pre>
-
-          <h3>Linux</h3>
-<pre><code class="language-bash">sudo systemctl start mysql
-sudo systemctl stop mysql</code></pre>
-
-          <h3>Windows</h3>
-<pre><code class="language-bash">net start MySQL
-net stop MySQL</code></pre>
-          <p>Default service name is <code class="inline">MySQL</code>. If you set a custom name during install, look it up in <em>services.msc</em>.</p>
+          <p>Two common stumbles here: a wrong password gives <em>Access denied</em> (<a href="#tb-denied">fix</a>), and a server that isn't running gives <em>Can't connect</em> (<a href="#tb-connect">fix</a>).</p>
 
         </div>
       </section>
 
-      <section id="connect" class="lab-section lab-section--alt">
-        <h2 class="section-title">6. Connect</h2>
+      <!-- ============================================
+           SECTION 4 - CREATE THE DATABASE
+           ============================================ -->
+      <section id="database" class="lab-section lab-section--alt">
+        <h2 class="section-title">4. Create the database</h2>
         <div class="section-body">
 
-          <p>Open MySQL Workbench. On the home screen you'll see a tile labeled <em>Local instance 3306</em> (or similar). Click it.</p>
+          <p>You'll paste each block below into the Workbench SQL editor, then click the <strong>lightning-bolt button</strong> (⚡) to run it. The bolt that runs everything in the editor is the first one; you can also press Cmd+Shift+Enter (Mac) or Ctrl+Shift+Enter (Windows).</p>
 
-          <p>Workbench prompts for the root password. Type the one you set in Section 1 (or leave it blank if you didn't set one) and click OK. You should land in the SQL editor with a sidebar showing schemas on the left.</p>
-
-          <p>If you'd rather use the terminal, run:</p>
-<pre><code class="language-bash">mysql -u root -h 127.0.0.1 -p</code></pre>
-          <p>Nothing shows on screen while you type the password. Press Enter. You should see a welcome banner and the <code class="inline">mysql&gt;</code> prompt.</p>
-
-        </div>
-      </section>
-
-      <section id="workbench" class="lab-section">
-        <h2 class="section-title">7. Create a database</h2>
-        <div class="section-body">
-
-          <p>Open MySQL Workbench. Click the default <em>Local instance</em> connection tile. Enter your password (blank if you didn't set one). You should see a SQL editor tab.</p>
-
-          <p>Paste each block below into the editor and click the lightning-bolt button (or press Cmd+Enter / Ctrl+Enter) to run.</p>
-
-          <h3>Create the database</h3>
+          <h3>4a. Make the database</h3>
 <pre><code class="language-sql">CREATE DATABASE space_missions;
-SHOW DATABASES;
 USE space_missions;</code></pre>
-          <p><code class="inline">SHOW DATABASES</code> confirms it exists. <code class="inline">USE</code> switches into it for the rest of the session.</p>
+          <p>In the Navigator on the left, click the refresh icon next to SCHEMAS. <code class="inline">space_missions</code> appears. Double-click it so its name goes <strong>bold</strong>, which means it's the active database.</p>
 
-          <h3>Create tables</h3>
+          <h3>4b. Create the tables</h3>
 <pre><code class="language-sql">CREATE TABLE spaceships (
     sid            INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     spaceship_name VARCHAR(255),
@@ -268,11 +232,17 @@ CREATE TABLE missions (
     duration    TEXT
 );</code></pre>
 
-          <h3>Add foreign keys</h3>
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>The Action Output panel at the bottom shows three green checkmarks. Expand <code class="inline">space_missions → Tables</code> in the Navigator and you'll see <code class="inline">destinations</code>, <code class="inline">missions</code>, <code class="inline">spaceships</code>.</p>
+          </div>
+
+          <h3>4c. Add the foreign keys</h3>
+          <p>The <code class="inline">missions</code> table references the other two, so we mark its columns as foreign keys:</p>
 <pre><code class="language-sql">ALTER TABLE missions ADD FOREIGN KEY (sid) REFERENCES spaceships(sid);
 ALTER TABLE missions ADD FOREIGN KEY (did) REFERENCES destinations(did);</code></pre>
 
-          <h3>Insert data</h3>
+          <h3>4d. Insert some data</h3>
 <pre><code class="language-sql">INSERT INTO spaceships (spaceship_name, capacity, type)
 VALUES ('Explorer', 5, 'Scientific');
 
@@ -281,33 +251,68 @@ VALUES (100, 'Jupiter', 'L', 'Planet');
 
 INSERT INTO missions (sid, did, description, duration)
 VALUES (1, 100, 'Research', '3 Years');</code></pre>
-          <p>One spaceship, Explorer, sent to Jupiter for a 3-year research mission.</p>
+          <p>This records that one spaceship, <em>Explorer</em>, was sent to <em>Jupiter</em> for a 3-year research mission.</p>
 
-          <h3>Test it</h3>
+          <h3>4e. Test query</h3>
 <pre><code class="language-sql">SELECT s.spaceship_name, d.destination_name, m.description
 FROM   spaceships s, destinations d, missions m
 WHERE  s.sid = m.sid
   AND  d.did = m.did;</code></pre>
-          <p>If the result is <code class="inline">Explorer | Jupiter | Research</code>, your database works.</p>
 
-          <p>Practice SQL elsewhere: <a href="https://sqlbolt.com/" target="_blank" rel="noopener">SQLBolt</a>, <a href="https://sqlzoo.net/" target="_blank" rel="noopener">SQLZoo</a>, or the <a href="https://www.w3schools.com/sql/trysql.asp" target="_blank" rel="noopener">W3Schools editor</a>.</p>
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>The bottom of the editor shows a results grid with one row:</p>
+<pre><code class="language-none">Explorer | Jupiter | Research</code></pre>
+            <p>If you see that, your database is set up correctly.</p>
+          </div>
 
         </div>
       </section>
 
-      <section id="python" class="lab-section lab-section--alt">
-        <h2 class="section-title">8. Python (optional)</h2>
+      <!-- ============================================
+           SECTION 5 - PYTHON CONNECTOR
+           ============================================ -->
+      <section id="python" class="lab-section">
+        <h2 class="section-title">5. Python connector</h2>
         <div class="section-body">
 
-          <p>Save this as <code class="inline">test_mysql.py</code> and replace <code class="inline">#PASSWORD#</code> with your root password.</p>
+          <p>Every lab after this one uses Python to query MySQL. The connector is the library that lets your Python code talk to the database. We test it now so a broken setup gets fixed today, not the night before homework is due.</p>
 
-<pre><code class="language-python">import mysql.connector
+          <p>Check Python 3 is installed first:</p>
+<pre><code class="language-bash">python3 --version</code></pre>
+          <p>If that prints a version (3.9 or newer), continue. If not, install Python from <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org/downloads</a>.</p>
+
+          <h3>5a. Make a virtual environment</h3>
+          <p>A virtual environment is a private, throwaway Python folder where you can install libraries without touching the rest of your system. Modern Python (and Homebrew) <em>require</em> this on many machines, so we use it from the start.</p>
+          <p>In a terminal:</p>
+
+          <p class="os-tag">macOS / Linux</p>
+<pre><code class="language-bash">python3 -m venv cs460env
+source cs460env/bin/activate</code></pre>
+
+          <p class="os-tag">Windows (PowerShell)</p>
+<pre><code class="language-bash">python -m venv cs460env
+cs460env\Scripts\activate</code></pre>
+
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>Your terminal prompt now starts with <code class="inline">(cs460env)</code>. That means you're inside the environment. You'll need to run the <code class="inline">activate</code> line again any time you open a new terminal.</p>
+          </div>
+
+          <h3>5b. Install the connector</h3>
+<pre><code class="language-bash">pip install mysql-connector-python</code></pre>
+          <p>Because you're inside the virtual environment, this just works. If you skipped Step 5a and see an error about an <em>externally-managed-environment</em>, that's exactly why the environment exists, see <a href="#tb-pep668">Troubleshooting: externally-managed-environment</a>.</p>
+
+          <h3>5c. Write the test script</h3>
+          <p>Do <strong>not</strong> use TextEdit's default mode, it saves rich text and Python can't read it. The safest way is to create the file from the terminal. Paste this whole block:</p>
+<pre><code class="language-bash">cat &gt; test_mysql.py &lt;&lt; 'EOF'
+import mysql.connector
 
 db = mysql.connector.connect(
     user='root',
     host='127.0.0.1',
     port=3306,
-    password='#PASSWORD#',
+    password='',
     database='space_missions'
 )
 
@@ -325,63 +330,103 @@ for row in cursor:
     print(row)
 
 cursor.close()
-db.close()</code></pre>
+db.close()
+EOF</code></pre>
+          <p>If you set a root password in Step 1, open <code class="inline">test_mysql.py</code> and put it between the quotes on the <code class="inline">password=''</code> line. If your password is blank, leave it as is.</p>
+          <p>(Prefer an editor? Use VS Code, or in TextEdit choose <em>Format → Make Plain Text</em> first, and save the file named exactly <code class="inline">test_mysql.py</code>.)</p>
 
-          <p>Run it:</p>
-<pre><code class="language-bash">python3 test_mysql.py</code></pre>
+          <h3>5d. Run it</h3>
+<pre><code class="language-bash">python test_mysql.py</code></pre>
 
-          <p>You should see <code class="inline">('Explorer', 'Jupiter', 'Research')</code>. If you do, the connector works and you're done.</p>
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+<pre><code class="language-none">('Explorer', 'Jupiter', 'Research')</code></pre>
+            <p>That one tuple means Python connected to MySQL, ran the query, and got the result back. The connector works and the lab is complete.</p>
+          </div>
+
+          <p>If you get <code class="inline">No module named 'mysql'</code>, your pip and python don't match, see <a href="#tb-nomodule">Troubleshooting: No module named mysql</a>.</p>
 
         </div>
       </section>
 
+      <!-- ============================================
+           DONE CHECKLIST
+           ============================================ -->
+      <section id="done" class="lab-section lab-section--alt">
+        <h2 class="section-title">You're done when…</h2>
+        <div class="section-body">
+
+          <ol>
+            <li><code class="inline">mysql --version</code> prints a version number.</li>
+            <li>MySQL Workbench connects to your local server.</li>
+            <li>The test query in Step 4e returns <code class="inline">Explorer | Jupiter | Research</code>.</li>
+            <li>Running <code class="inline">python test_mysql.py</code> prints <code class="inline">('Explorer', 'Jupiter', 'Research')</code>.</li>
+          </ol>
+
+          <p>If all four are true, you've finished Lab 2. Keep your root password somewhere safe, you'll use this same setup for the rest of the course.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           TROUBLESHOOTING
+           ============================================ -->
       <section id="troubleshooting" class="lab-section">
         <h2 class="section-title">Troubleshooting</h2>
         <div class="section-body">
 
-          <div class="data-table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr><th>Error</th><th>Cause</th><th>Fix</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="mono">ERROR 1045: Access denied for user 'root'</td>
-                  <td>Wrong password.</td>
-                  <td>Retype it. If you forgot it, reinstall MySQL.</td>
-                </tr>
-                <tr>
-                  <td class="mono">Can't connect to MySQL server on '127.0.0.1'</td>
-                  <td>Server isn't running.</td>
-                  <td>See Section 5.</td>
-                </tr>
-                <tr>
-                  <td class="mono">command not found: mysql</td>
-                  <td>PATH not set.</td>
-                  <td>Section 4. Use a fresh terminal after.</td>
-                </tr>
-                <tr>
-                  <td class="mono">Address already in use (port 3306)</td>
-                  <td>Another MySQL is already running.</td>
-                  <td>Stop the old one first.</td>
-                </tr>
-                <tr>
-                  <td class="mono">ModuleNotFoundError: No module named 'mysql'</td>
-                  <td>Connector installed for a different Python.</td>
-                  <td><code class="inline">python3 -m pip install mysql-connector-python</code></td>
-                </tr>
-                <tr>
-                  <td class="mono">authentication plugin 'caching_sha2_password' cannot be loaded</td>
-                  <td>Old client, new MySQL.</td>
-                  <td><code class="inline">pip install --upgrade mysql-connector-python</code></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <p>Find your error message below. If yours isn't here, raise your hand.</p>
+
+          <h3 id="tb-path">"command not found: mysql"</h3>
+          <p>MySQL is installed but your terminal doesn't know where it is. You need to add it to your PATH.</p>
+          <p class="os-tag">macOS (DMG install)</p>
+<pre><code class="language-bash">echo 'export PATH="/usr/local/mysql/bin:$PATH"' &gt;&gt; ~/.zshrc
+source ~/.zshrc</code></pre>
+          <p class="os-tag">macOS (Homebrew)</p>
+          <p>Should already be on PATH. If not, run <code class="inline">eval "$(/opt/homebrew/bin/brew shellenv)"</code> and open a new terminal.</p>
+          <p class="os-tag">Windows</p>
+          <p>Search "Environment Variables" → Edit the system environment variables → Environment Variables → under System variables select <code class="inline">Path</code> → Edit → New → add <code class="inline">C:\Program Files\MySQL\MySQL Server 8.4\bin</code> → OK out. <strong>Open a fresh terminal afterward.</strong></p>
+
+          <h3 id="tb-version">Yellow warning: "Incompatible/nonstandard server version (9.x)"</h3>
+          <p>Workbench was last updated for MySQL 8.0, but your server is 9.x. Everything you do in this course works fine. Click OK and continue. Only advanced migration features are affected, which we never use.</p>
+
+          <h3 id="tb-denied">"ERROR 1045: Access denied for user 'root'"</h3>
+          <p>Wrong password. Retype the one you set in Step 1. If you genuinely forgot it, the simplest fix is to uninstall and reinstall MySQL, setting a password you'll remember this time.</p>
+
+          <h3 id="tb-connect">"Can't connect to MySQL server on '127.0.0.1'"</h3>
+          <p>The server isn't running. Start it:</p>
+          <p class="os-tag">macOS (Homebrew)</p>
+<pre><code class="language-bash">brew services start mysql</code></pre>
+          <p class="os-tag">macOS (DMG)</p>
+          <p>System Settings → MySQL → Start MySQL Server.</p>
+          <p class="os-tag">Linux</p>
+<pre><code class="language-bash">sudo systemctl start mysql</code></pre>
+          <p class="os-tag">Windows</p>
+<pre><code class="language-bash">net start MySQL</code></pre>
+
+          <h3 id="tb-pep668">"error: externally-managed-environment"</h3>
+          <p>Your Python refuses to install libraries system-wide to protect itself. This is exactly what the virtual environment in Step 5a is for. Make sure your prompt shows <code class="inline">(cs460env)</code> before running pip. If it doesn't, run the activate command again:</p>
+<pre><code class="language-bash">source cs460env/bin/activate    # macOS / Linux
+cs460env\Scripts\activate       # Windows</code></pre>
+
+          <h3 id="tb-nomodule">"ModuleNotFoundError: No module named 'mysql'"</h3>
+          <p>You installed the connector with one Python but ran the script with a different one. The fix is to install and run from inside the same virtual environment. Activate it, reinstall, then run:</p>
+<pre><code class="language-bash">source cs460env/bin/activate
+pip install mysql-connector-python
+python test_mysql.py</code></pre>
+
+          <h3 id="tb-rtf">"can't open file … No such file or directory" (but the file exists)</h3>
+          <p>TextEdit saved your script as <code class="inline">test_mysql.py.rtf</code> instead of <code class="inline">test_mysql.py</code>. Delete it and recreate the file using the <code class="inline">cat</code> command in Step 5c, or in TextEdit choose <em>Format → Make Plain Text</em> before saving.</p>
+
+          <h3 id="tb-port">"Address already in use" (port 3306)</h3>
+          <p>Another MySQL server is already running. You don't need a second one. Stop the extra instance, or just connect to the one that's already up.</p>
 
         </div>
       </section>
 
+      <!-- ============================================
+           CHEAT SHEET
+           ============================================ -->
       <section id="cheatsheet" class="lab-section lab-section--alt">
         <h2 class="section-title">Cheat sheet</h2>
         <div class="section-body">
@@ -392,14 +437,14 @@ db.close()</code></pre>
                 <tr><th>Command</th><th>What it does</th></tr>
               </thead>
               <tbody>
-                <tr><td class="mono">mysql -u root -p</td>            <td>Connect as root</td></tr>
+                <tr><td class="mono">mysql -u root -p</td>            <td>Connect from the terminal as root</td></tr>
                 <tr><td class="mono">SHOW DATABASES;</td>             <td>List databases</td></tr>
                 <tr><td class="mono">USE space_missions;</td>         <td>Switch into a database</td></tr>
-                <tr><td class="mono">SHOW TABLES;</td>                <td>List tables in current database</td></tr>
+                <tr><td class="mono">SHOW TABLES;</td>                <td>List tables in the current database</td></tr>
                 <tr><td class="mono">DESCRIBE spaceships;</td>        <td>Show a table's columns</td></tr>
-                <tr><td class="mono">SELECT * FROM spaceships;</td>   <td>Show every row</td></tr>
-                <tr><td class="mono">SOURCE script.sql;</td>          <td>Run a .sql file</td></tr>
-                <tr><td class="mono">exit;</td>                       <td>Disconnect</td></tr>
+                <tr><td class="mono">SELECT * FROM spaceships;</td>   <td>Show every row of a table</td></tr>
+                <tr><td class="mono">source cs460env/bin/activate</td><td>Enter your Python environment (Mac/Linux)</td></tr>
+                <tr><td class="mono">exit;</td>                       <td>Disconnect from MySQL</td></tr>
               </tbody>
             </table>
           </div>
