@@ -3,12 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Boston University CS460 Introduction to Database Systems — Summer 2026 — Lab 2">
-  <title>Lab 2 — CS460 Summer 2026</title>
+  <meta name="description" content="Boston University CS460 Introduction to Database Systems, Summer 2026, Lab 2: MySQL Setup and the Python Connector">
+  <title>Lab 2: MySQL Setup &amp; Python Connector | CS460</title>
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -18,15 +17,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
 
-  <meta property="og:title" content="Lab 2 — CS460 Summer 2026">
+  <meta property="og:title" content="Lab 2: MySQL Setup &amp; Python Connector | CS460">
   <meta property="og:type" content="article">
 </head>
 
 <body data-page="lab">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- ===== Global Navigation ===== -->
   <nav class="nav" aria-label="Primary">
     <div class="nav__inner">
       <a class="nav__title" href="index.html">
@@ -64,77 +64,352 @@
     </div>
   </nav>
 
-  <!-- ===== Hero ===== -->
   <header class="hero">
-    <h1 class="hero__title">Lab 2</h1>
+    <h1 class="hero__title hero__title--lab">Lab 2<span class="hero__subtitle">MySQL Setup &amp; Python Connector</span></h1>
   </header>
 
-  <!-- ===== Main ===== -->
   <main id="main" class="lab-layout">
 
-    <!-- Sidebar TOC (desktop) -->
     <aside class="toc" aria-label="Table of contents">
       <p class="toc__label">On this page</p>
       <ul class="toc__list">
-        <li><a href="#overview">1. Overview</a></li>
-        <li><a href="#concepts">2. Concepts</a></li>
-        <li><a href="#walkthrough">3. Walkthrough</a></li>
-        <li><a href="#examples">4. Examples</a></li>
+        <li><a href="#install-mysql">1. Install MySQL</a></li>
+        <li><a href="#install-shell">2. MySQL Shell</a></li>
+        <li><a href="#install-connector">3. Python connector</a></li>
+        <li><a href="#set-path">4. Set PATH</a></li>
+        <li><a href="#server">5. Start the server</a></li>
+        <li><a href="#connect">6. Connect</a></li>
+        <li><a href="#workbench">7. Create a database</a></li>
+        <li><a href="#python">8. Python (optional)</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#cheatsheet">Cheat sheet</a></li>
       </ul>
     </aside>
 
-    <!-- Content column -->
     <div class="lab-content">
 
       <details class="toc-mobile">
         <summary>On this page ▾</summary>
         <ul>
-          <li><a href="#overview">1. Overview</a></li>
-          <li><a href="#concepts">2. Concepts</a></li>
-          <li><a href="#walkthrough">3. Walkthrough</a></li>
-          <li><a href="#examples">4. Examples</a></li>
+          <li><a href="#install-mysql">1. Install MySQL</a></li>
+          <li><a href="#install-shell">2. MySQL Shell</a></li>
+          <li><a href="#install-connector">3. Python connector</a></li>
+          <li><a href="#set-path">4. Set PATH</a></li>
+          <li><a href="#server">5. Start the server</a></li>
+          <li><a href="#connect">6. Connect</a></li>
+          <li><a href="#workbench">7. Create a database</a></li>
+          <li><a href="#python">8. Python (optional)</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+          <li><a href="#cheatsheet">Cheat sheet</a></li>
         </ul>
       </details>
 
-      <section id="overview" class="lab-section">
-        <h2 class="section-title">1. Overview</h2>
+      <section id="install-mysql" class="lab-section">
+        <h2 class="section-title">1. Install MySQL</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>Download MySQL 8.4 LTS from <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">dev.mysql.com/downloads/mysql</a>. You can skip the Oracle account when prompted.</p>
+
+          <p>The installer will ask you to set a root password. Pick something you will remember. You need it every time you connect.</p>
+
+          <h3>macOS</h3>
+          <p>Open the DMG and follow the prompts. Pick ARM 64 for Apple Silicon, x86 64 for Intel.</p>
+          <p>Or with Homebrew:</p>
+<pre><code class="language-bash">brew install mysql
+brew services start mysql
+mysql_secure_installation</code></pre>
+
+          <h3>Linux (Ubuntu/Debian)</h3>
+<pre><code class="language-bash">sudo apt update
+sudo apt install mysql-server
+sudo mysql_secure_installation</code></pre>
+
+          <h3>Windows</h3>
+          <p>Download the <a href="https://dev.mysql.com/downloads/installer/" target="_blank" rel="noopener">MySQL Installer for Windows</a>. Choose <em>Developer Default</em>. That installs the server, the shell, and the Python connector together.</p>
+
         </div>
       </section>
 
-      <section id="concepts" class="lab-section lab-section--alt">
-        <h2 class="section-title">2. Concepts</h2>
+      <section id="install-shell" class="lab-section lab-section--alt">
+        <h2 class="section-title">2. MySQL Shell</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>MySQL Shell is the modern client. Workbench still works if you prefer it, but we use the shell plus a VS Code extension in this course.</p>
+
+          <p>On macOS:</p>
+<pre><code class="language-bash">brew install mysql-shell</code></pre>
+          <p>On Linux, grab the package from <a href="https://dev.mysql.com/downloads/shell/" target="_blank" rel="noopener">dev.mysql.com/downloads/shell</a>. On Windows, Developer Default already installed it.</p>
+
+          <p>For a GUI, install the <em>MySQL Shell for VS Code</em> extension. Open VS Code, search the Extensions panel for it, install the one by Oracle. A database icon appears in the sidebar.</p>
+
         </div>
       </section>
 
-      <section id="walkthrough" class="lab-section">
-        <h2 class="section-title">3. Walkthrough</h2>
+      <section id="install-connector" class="lab-section">
+        <h2 class="section-title">3. Python connector</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>Check Python is installed: <code class="inline">python3 --version</code>. Then:</p>
+<pre><code class="language-bash">pip install mysql-connector-python</code></pre>
+          <p>Anaconda users:</p>
+<pre><code class="language-bash">conda install -c anaconda mysql-connector-python</code></pre>
+
+          <p>Confirm it imports:</p>
+<pre><code class="language-bash">python3 -c "import mysql.connector; print(mysql.connector.__version__)"</code></pre>
+
         </div>
       </section>
 
-      <section id="examples" class="lab-section lab-section--alt">
-        <h2 class="section-title">4. Examples</h2>
+      <section id="set-path" class="lab-section lab-section--alt">
+        <h2 class="section-title">4. Set PATH</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>Run <code class="inline">mysql -V</code> in a fresh terminal. If you see a version number, skip this section.</p>
+
+          <h3>macOS (DMG install)</h3>
+<pre><code class="language-bash">echo 'export PATH="/usr/local/mysql/bin:$PATH"' &gt;&gt; ~/.zshrc
+source ~/.zshrc</code></pre>
+
+          <h3>macOS (Homebrew)</h3>
+          <p>Homebrew adds <code class="inline">/opt/homebrew/bin</code> to PATH for you on Apple Silicon. If it didn't:</p>
+<pre><code class="language-bash">echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' &gt;&gt; ~/.zprofile</code></pre>
+          <p>Open a new terminal.</p>
+
+          <h3>Windows</h3>
+          <ol>
+            <li>Start → search "Environment Variables" → open <em>Edit the system environment variables</em>.</li>
+            <li>Click <em>Environment Variables</em>.</li>
+            <li>Under <em>System variables</em>, select <code class="inline">Path</code>, click <em>Edit</em>.</li>
+            <li>Click <em>New</em>, paste <code class="inline">C:\Program Files\MySQL\MySQL Server 8.4\bin</code>.</li>
+            <li>OK out of everything. Open a fresh PowerShell.</li>
+          </ol>
+
+        </div>
+      </section>
+
+      <section id="server" class="lab-section">
+        <h2 class="section-title">5. Start the server</h2>
+        <div class="section-body">
+
+          <p>The installer usually starts the server for you. If Section 6 works, ignore this. Otherwise:</p>
+
+          <h3>macOS</h3>
+          <p>Homebrew install:</p>
+<pre><code class="language-bash">brew services start mysql
+brew services stop mysql</code></pre>
+          <p>DMG install: <em>System Settings → MySQL</em>, or:</p>
+<pre><code class="language-bash">sudo /usr/local/mysql/support-files/mysql.server start</code></pre>
+
+          <h3>Linux</h3>
+<pre><code class="language-bash">sudo systemctl start mysql
+sudo systemctl stop mysql</code></pre>
+
+          <h3>Windows</h3>
+<pre><code class="language-bash">net start MySQL
+net stop MySQL</code></pre>
+          <p>Default service name is <code class="inline">MySQL</code>. If you set a custom name during install, look it up in <em>services.msc</em>.</p>
+
+        </div>
+      </section>
+
+      <section id="connect" class="lab-section lab-section--alt">
+        <h2 class="section-title">6. Connect</h2>
+        <div class="section-body">
+
+          <p>In a terminal:</p>
+<pre><code class="language-bash">mysql -u root -h 127.0.0.1 -p</code></pre>
+
+          <p><code class="inline">-u</code> is the user, <code class="inline">-h</code> is the host (your laptop), <code class="inline">-p</code> prompts for the password.</p>
+
+          <p>Type the root password from Section 1. Nothing shows on screen while you type. Press Enter.</p>
+
+          <p>You should see a welcome banner and the <code class="inline">mysql&gt;</code> prompt. You are connected.</p>
+
+        </div>
+      </section>
+
+      <section id="workbench" class="lab-section">
+        <h2 class="section-title">7. Create a database</h2>
+        <div class="section-body">
+
+          <p>Run these at the <code class="inline">mysql&gt;</code> prompt.</p>
+
+          <h3>Create the database</h3>
+<pre><code class="language-sql">CREATE DATABASE space_missions;
+SHOW DATABASES;
+USE space_missions;</code></pre>
+          <p><code class="inline">SHOW DATABASES</code> confirms it exists. <code class="inline">USE</code> switches into it for the rest of the session.</p>
+
+          <h3>Create tables</h3>
+<pre><code class="language-sql">CREATE TABLE spaceships (
+    sid            INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    spaceship_name VARCHAR(255),
+    capacity       INT,
+    type           VARCHAR(255)
+);
+
+CREATE TABLE destinations (
+    did              INT NOT NULL PRIMARY KEY,
+    destination_name VARCHAR(255),
+    size             ENUM('S', 'M', 'L'),
+    type             VARCHAR(255)
+);
+
+CREATE TABLE missions (
+    sid         INT NOT NULL PRIMARY KEY,
+    did         INT NOT NULL,
+    description TEXT,
+    duration    TEXT
+);</code></pre>
+
+          <h3>Add foreign keys</h3>
+<pre><code class="language-sql">ALTER TABLE missions ADD FOREIGN KEY (sid) REFERENCES spaceships(sid);
+ALTER TABLE missions ADD FOREIGN KEY (did) REFERENCES destinations(did);</code></pre>
+
+          <h3>Insert data</h3>
+<pre><code class="language-sql">INSERT INTO spaceships (spaceship_name, capacity, type)
+VALUES ('Explorer', 5, 'Scientific');
+
+INSERT INTO destinations (did, destination_name, size, type)
+VALUES (100, 'Jupiter', 'L', 'Planet');
+
+INSERT INTO missions (sid, did, description, duration)
+VALUES (1, 100, 'Research', '3 Years');</code></pre>
+          <p>One spaceship, Explorer, sent to Jupiter for a 3-year research mission.</p>
+
+          <h3>Test it</h3>
+<pre><code class="language-sql">SELECT s.spaceship_name, d.destination_name, m.description
+FROM   spaceships s, destinations d, missions m
+WHERE  s.sid = m.sid
+  AND  d.did = m.did;</code></pre>
+          <p>If the result is <code class="inline">Explorer | Jupiter | Research</code>, your database works.</p>
+
+          <p>Practice SQL elsewhere: <a href="https://sqlbolt.com/" target="_blank" rel="noopener">SQLBolt</a>, <a href="https://sqlzoo.net/" target="_blank" rel="noopener">SQLZoo</a>, or the <a href="https://www.w3schools.com/sql/trysql.asp" target="_blank" rel="noopener">W3Schools editor</a>.</p>
+
+        </div>
+      </section>
+
+      <section id="python" class="lab-section lab-section--alt">
+        <h2 class="section-title">8. Python (optional)</h2>
+        <div class="section-body">
+
+          <p>Save this as <code class="inline">test_mysql.py</code> and replace <code class="inline">#PASSWORD#</code> with your root password.</p>
+
+<pre><code class="language-python">import mysql.connector
+
+db = mysql.connector.connect(
+    user='root',
+    host='127.0.0.1',
+    port=3306,
+    password='#PASSWORD#',
+    database='space_missions'
+)
+
+cursor = db.cursor()
+
+query = """
+SELECT s.spaceship_name, d.destination_name, m.description
+FROM   spaceships s, destinations d, missions m
+WHERE  s.sid = m.sid
+  AND  d.did = m.did
+"""
+
+cursor.execute(query)
+for row in cursor:
+    print(row)
+
+cursor.close()
+db.close()</code></pre>
+
+          <p>Run it:</p>
+<pre><code class="language-bash">python3 test_mysql.py</code></pre>
+
+          <p>You should see <code class="inline">('Explorer', 'Jupiter', 'Research')</code>. If you do, the connector works and you're done.</p>
+
+        </div>
+      </section>
+
+      <section id="troubleshooting" class="lab-section">
+        <h2 class="section-title">Troubleshooting</h2>
+        <div class="section-body">
+
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Error</th><th>Cause</th><th>Fix</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="mono">ERROR 1045: Access denied for user 'root'</td>
+                  <td>Wrong password.</td>
+                  <td>Retype it. If you forgot it, reinstall MySQL.</td>
+                </tr>
+                <tr>
+                  <td class="mono">Can't connect to MySQL server on '127.0.0.1'</td>
+                  <td>Server isn't running.</td>
+                  <td>See Section 5.</td>
+                </tr>
+                <tr>
+                  <td class="mono">command not found: mysql</td>
+                  <td>PATH not set.</td>
+                  <td>Section 4. Use a fresh terminal after.</td>
+                </tr>
+                <tr>
+                  <td class="mono">Address already in use (port 3306)</td>
+                  <td>Another MySQL is already running.</td>
+                  <td>Stop the old one first.</td>
+                </tr>
+                <tr>
+                  <td class="mono">ModuleNotFoundError: No module named 'mysql'</td>
+                  <td>Connector installed for a different Python.</td>
+                  <td><code class="inline">python3 -m pip install mysql-connector-python</code></td>
+                </tr>
+                <tr>
+                  <td class="mono">authentication plugin 'caching_sha2_password' cannot be loaded</td>
+                  <td>Old client, new MySQL.</td>
+                  <td><code class="inline">pip install --upgrade mysql-connector-python</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="cheatsheet" class="lab-section lab-section--alt">
+        <h2 class="section-title">Cheat sheet</h2>
+        <div class="section-body">
+
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Command</th><th>What it does</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="mono">mysql -u root -p</td>            <td>Connect as root</td></tr>
+                <tr><td class="mono">SHOW DATABASES;</td>             <td>List databases</td></tr>
+                <tr><td class="mono">USE space_missions;</td>         <td>Switch into a database</td></tr>
+                <tr><td class="mono">SHOW TABLES;</td>                <td>List tables in current database</td></tr>
+                <tr><td class="mono">DESCRIBE spaceships;</td>        <td>Show a table's columns</td></tr>
+                <tr><td class="mono">SELECT * FROM spaceships;</td>   <td>Show every row</td></tr>
+                <tr><td class="mono">SOURCE script.sql;</td>          <td>Run a .sql file</td></tr>
+                <tr><td class="mono">exit;</td>                       <td>Disconnect</td></tr>
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </section>
 
     </div>
   </main>
 
-  <!-- ===== Footer ===== -->
   <footer class="footer">
     <div class="footer__inner">
       CS460 Summer 2026 &middot; Boston University
     </div>
   </footer>
 
-  <!-- ===== Search Overlay ===== -->
   <div id="search-overlay" class="search-overlay" role="dialog" aria-modal="true" aria-label="Search">
     <div class="search__bar">
       <button class="search__back" type="button" aria-label="Close search">
