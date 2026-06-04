@@ -104,7 +104,7 @@
         <span class="callout__label">Read this first</span>
         <p>Goal: get the VERSUS skeleton running at <code class="inline">localhost:5000</code> where you can register, log in, create a bracket, and view it. That's the starting point for PA1.</p>
         <p>You need MySQL working from <a href="lab-2.html">Lab 2</a>. If it isn't, fix that with <a href="lab-2.html#troubleshooting">Lab 2 Troubleshooting</a> before continuing.</p>
-        <p><strong>Each step has a green "Check it worked" box.</strong> Don't skip ahead until your output matches. If it doesn't, find your error in <a href="#troubleshooting">Troubleshooting</a> at the bottom.</p>
+        <p>If you hit an error, find it in <a href="#troubleshooting">Troubleshooting</a> at the bottom.</p>
         <p><strong>Windows users:</strong> use <strong>PowerShell</strong>, not the old Command Prompt. Most commands assume PowerShell.</p>
       </aside>
 
@@ -131,12 +131,7 @@
           <p class="os-tag">Windows (PowerShell)</p>
 <pre><code class="language-bash">cd $HOME\Desktop\samplecode</code></pre>
 
-          <div class="expect">
-            <span class="expect__label">Check it worked</span>
-            <p>Run <code class="inline">ls</code> (macOS) or <code class="inline">dir</code> (Windows). You should see <code class="inline">app.py</code>, <code class="inline">schema.sql</code>, <code class="inline">requirements.txt</code>, and a <code class="inline">templates</code> folder, all at the top level.</p>
-          </div>
-
-          <p class="fixhint">Don't see <code class="inline">app.py</code> at this level? See <a href="#tb-nested-folder">nested folder fix</a>.</p>
+          <p class="fixhint">Don't see <code class="inline">app.py</code> when you <code class="inline">ls</code> / <code class="inline">dir</code>? See <a href="#tb-nested-folder">nested folder fix</a>.</p>
 
         </div>
       </section>
@@ -166,22 +161,14 @@ source ~/Desktop/cs460env/bin/activate</code></pre>
 <pre><code class="language-bash">python -m venv $HOME\Desktop\cs460env
 $HOME\Desktop\cs460env\Scripts\Activate.ps1</code></pre>
 
-          <div class="expect">
-            <span class="expect__label">Check it worked</span>
-            <p>Your prompt now starts with <code class="inline">(cs460env)</code>.</p>
-          </div>
+          <p>Your prompt should now start with <code class="inline">(cs460env)</code>.</p>
 
-          <p class="fixhint">PowerShell error <em>"running scripts is disabled"</em>? See <a href="#tb-execpolicy">execution policy fix</a>. <em>"pip not found"</em> later? See <a href="#tb-pip-not-found">pip fix</a>.</p>
+          <p class="fixhint">PowerShell error <em>"running scripts is disabled"</em>? See <a href="#tb-execpolicy">execution policy fix</a>.</p>
 
           <h3>2b. Install the packages</h3>
 <pre><code class="language-bash">pip install -r requirements.txt</code></pre>
 
-          <div class="expect">
-            <span class="expect__label">Check it worked</span>
-            <p>The output ends with <code class="inline">Successfully installed Flask-3.x flask-login-0.6.x mysql-connector-python-9.x</code>. No red error lines.</p>
-          </div>
-
-          <p class="fixhint">Got <em>externally-managed-environment</em>? See <a href="#tb-pep668">venv not active</a>. Got a wheel/build error? See <a href="#tb-wheel-build">build error fix</a>.</p>
+          <p class="fixhint">Got <em>externally-managed-environment</em>? See <a href="#tb-pep668">venv not active</a>. Build/wheel error? See <a href="#tb-wheel-build">build error fix</a>. <em>"pip not found"</em>? See <a href="#tb-pip-not-found">pip fix</a>.</p>
 
         </div>
       </section>
@@ -225,15 +212,7 @@ $HOME\Desktop\cs460env\Scripts\Activate.ps1</code></pre>
           <p>Then run:</p>
 <pre><code class="language-sql">USE versus;
 SHOW TABLES;</code></pre>
-
-          <div class="expect">
-            <span class="expect__label">Check it worked</span>
-            <p>You should see four tables:</p>
-<pre><code class="language-none">Brackets
-Entrants
-Matchups
-Users</code></pre>
-          </div>
+          <p>Four tables should be listed: Brackets, Entrants, Matchups, Users.</p>
 
           <p class="fixhint">"mysql is not recognized" / "command not found"? See <a href="lab-2.html#tb-path">Lab 2 PATH fix</a>. PowerShell complains about <code class="inline">&lt;</code>? See <a href="#tb-ps-redirect">PowerShell redirection fix</a>. "Access denied" loading the schema? See <a href="#tb-schema-denied">wrong password fix</a>. <code class="inline">SHOW TABLES</code> empty? See <a href="#tb-no-tables">empty database fix</a>.</p>
 
@@ -274,15 +253,7 @@ DB_HOST     = 'localhost'</code></pre>
 
           <p>On macOS if <code class="inline">python</code> isn't found, use <code class="inline">python3 app.py</code>. (Inside an activated venv, both work.)</p>
 
-          <div class="expect">
-            <span class="expect__label">Check it worked</span>
-            <p>You should see output ending like this, and the terminal does NOT return to a prompt:</p>
-<pre><code class="language-none"> * Serving Flask app 'app'
- * Debug mode: on
- * Running on http://127.0.0.1:5000
-Press CTRL+C to quit</code></pre>
-            <p>That's the server running. Leave the terminal alone, don't close it.</p>
-          </div>
+          <p>The output ends with <code class="inline">Running on http://127.0.0.1:5000</code> and the terminal stays running. Leave it alone, the server is up.</p>
 
           <p class="fixhint">Errors? <a href="#tb-module-error">ModuleNotFoundError</a>, <a href="#tb-db-denied">database access denied</a>, <a href="#tb-unknown-db">unknown database 'versus'</a>, <a href="#tb-port">port 5000 in use</a>, <a href="#tb-airplay">macOS AirPlay using port 5000</a>, <a href="#tb-template-not-found">TemplateNotFound</a>.</p>
 
@@ -307,10 +278,7 @@ Press CTRL+C to quit</code></pre>
             <li>Click <strong>Browse brackets</strong>. Your bracket appears in the list.</li>
           </ol>
 
-          <div class="expect">
-            <span class="expect__label">Check it worked</span>
-            <p>Register, create-bracket, and browse all worked. Lab 3 is complete.</p>
-          </div>
+          <p>If register, create-bracket, and browse all worked, Lab 3 is complete.</p>
 
           <p>To stop the server: switch to the terminal running <code class="inline">python app.py</code> and press <code class="inline">Ctrl+C</code>.</p>
 
