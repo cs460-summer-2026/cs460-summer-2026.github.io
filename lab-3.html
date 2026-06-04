@@ -102,7 +102,7 @@
 
       <aside class="callout">
         <span class="callout__label">Read this first</span>
-        <p>Goal: get the VERSUS skeleton running at <code class="inline">localhost:5000</code> where you can register, log in, create a bracket, and view it. That's the starting point for PA1.</p>
+        <p>Goal: get the VERSUS skeleton running at <code class="inline">localhost:5001</code> where you can register, log in, create a bracket, and view it. That's the starting point for PA1.</p>
         <p>You need MySQL working from <a href="lab-2.html">Lab 2</a>. If it isn't, fix that with <a href="lab-2.html#troubleshooting">Lab 2 Troubleshooting</a> before continuing.</p>
         <p>If you hit an error, find it in <a href="#troubleshooting">Troubleshooting</a> at the bottom.</p>
         <p><strong>Windows users:</strong> use <strong>PowerShell</strong>, not the old Command Prompt. Most commands assume PowerShell.</p>
@@ -245,7 +245,21 @@ DB_HOST     = 'localhost'</code></pre>
 
           <p>Save the file.</p>
 
-          <h3>4b. Run the app</h3>
+          <h3>4b. Change the port to 5001</h3>
+
+          <p>The skeleton ships with port 5000, but macOS reserves that port for AirPlay Receiver and Windows sometimes has it taken too. To avoid the conflict, we use port 5001 in this class.</p>
+
+          <p>Scroll to the <strong>last line</strong> of <code class="inline">app.py</code>. You'll see:</p>
+
+<pre><code class="language-python">app.run(port=5000, debug=True)</code></pre>
+
+          <p>Change <code class="inline">5000</code> to <code class="inline">5001</code>:</p>
+
+<pre><code class="language-python">app.run(port=5001, debug=True)</code></pre>
+
+          <p>Save the file.</p>
+
+          <h3>4c. Run the app</h3>
 
           <p>Back in your terminal (still inside the venv, still in the <code class="inline">versus_skeleton</code> folder):</p>
 
@@ -253,9 +267,9 @@ DB_HOST     = 'localhost'</code></pre>
 
           <p>On macOS if <code class="inline">python</code> isn't found, use <code class="inline">python3 app.py</code>. (Inside an activated venv, both work.)</p>
 
-          <p>The output ends with <code class="inline">Running on http://127.0.0.1:5000</code> and the terminal stays running. Leave it alone, the server is up.</p>
+          <p>The output ends with <code class="inline">Running on http://127.0.0.1:5001</code> and the terminal stays running. Leave it alone, the server is up.</p>
 
-          <p class="fixhint">Errors? <a href="#tb-module-error">ModuleNotFoundError</a>, <a href="#tb-db-denied">database access denied</a>, <a href="#tb-unknown-db">unknown database 'versus'</a>, <a href="#tb-port">port 5000 in use</a>, <a href="#tb-airplay">macOS AirPlay using port 5000</a>, <a href="#tb-template-not-found">TemplateNotFound</a>.</p>
+          <p class="fixhint">Errors? <a href="#tb-module-error">ModuleNotFoundError</a>, <a href="#tb-db-denied">database access denied</a>, <a href="#tb-unknown-db">unknown database 'versus'</a>, <a href="#tb-port">port already in use</a>, <a href="#tb-template-not-found">TemplateNotFound</a>.</p>
 
         </div>
       </section>
@@ -267,7 +281,7 @@ DB_HOST     = 'localhost'</code></pre>
         <h2 class="section-title">5. Try it in the browser</h2>
         <div class="section-body">
 
-          <p>Open a browser and go to <a href="http://localhost:5000" target="_blank" rel="noopener">http://localhost:5000</a>. The VERSUS home page should load.</p>
+          <p>Open a browser and go to <a href="http://localhost:5001" target="_blank" rel="noopener">http://localhost:5001</a>. The VERSUS home page should load.</p>
 
           <p>Click through these in order:</p>
           <ol>
@@ -333,7 +347,7 @@ password = request.form.get('password')</code></pre>
 
           <ol>
             <li><code class="inline">SHOW TABLES;</code> on the <code class="inline">versus</code> database lists Brackets, Entrants, Matchups, Users.</li>
-            <li><code class="inline">python app.py</code> prints "Running on http://127.0.0.1:5000" with no errors.</li>
+            <li><code class="inline">python app.py</code> prints "Running on http://127.0.0.1:5001" with no errors.</li>
             <li>You registered an account and landed on the welcome page.</li>
             <li>You created an 8-entrant bracket and the view page showed 7 matchups.</li>
           </ol>
@@ -395,25 +409,20 @@ python app.py</code></pre>
           <h3 id="tb-unknown-db">Step 4: "Unknown database 'versus'"</h3>
           <p>The schema didn't run. Go back to Step 3. Confirm with <code class="inline">SHOW DATABASES;</code> that <code class="inline">versus</code> exists before retrying.</p>
 
-          <h3 id="tb-port">Step 4: "Address already in use" on port 5000</h3>
-          <p>Either you already have a copy of the app running in another terminal (find it, Ctrl+C), or change the port. Open <code class="inline">app.py</code>, find the last line, change <code class="inline">app.run(port=5000, debug=True)</code> to <code class="inline">app.run(port=5001, debug=True)</code>, save, re-run, and use <code class="inline">http://localhost:5001</code> in the browser.</p>
-
-          <h3 id="tb-airplay">Step 4 (macOS): port 5000 used by AirPlay Receiver</h3>
-          <p>macOS Monterey+ uses port 5000 for AirPlay Receiver. Two options:</p>
-          <ul>
-            <li>Disable AirPlay Receiver: <em>System Settings → General → AirDrop &amp; Handoff</em>, turn off <em>AirPlay Receiver</em>.</li>
-            <li>Or change Flask to a different port, same as the entry above.</li>
-          </ul>
+          <h3 id="tb-port">Step 4: "Address already in use" / port still taken</h3>
+          <p>Make sure you actually changed the port in Step 4b. Open the last line of <code class="inline">app.py</code> and confirm it reads <code class="inline">app.run(port=5001, debug=True)</code>. Save, then re-run.</p>
+          <p>Still taken on 5001? You probably have an old copy of the app already running in another terminal, find that terminal and press Ctrl+C. Or try another port like 5002, just use the same number in your browser URL.</p>
 
           <h3 id="tb-template-not-found">Step 4: "jinja2.exceptions.TemplateNotFound: hello.html"</h3>
           <p>You ran <code class="inline">python app.py</code> from the wrong folder. The <code class="inline">templates/</code> folder must sit right next to <code class="inline">app.py</code> in your current directory. <code class="inline">cd</code> back into the <code class="inline">versus_skeleton</code> folder and try again.</p>
 
-          <h3 id="tb-blank-page">Step 5: Browser shows "This site can't be reached" or blank</h3>
-          <p>Three things to check, in order:</p>
+          <h3 id="tb-blank-page">Step 5: Browser shows "This site can't be reached" or completely blank</h3>
+          <p>Four things to check, in order:</p>
           <ol>
             <li>Is <code class="inline">python app.py</code> still running in your terminal? If it returned to the prompt, the server crashed, scroll up for the error.</li>
-            <li>You're using <code class="inline">http://localhost:5000</code>, not <code class="inline">https://</code>. (No s.)</li>
-            <li>If you changed the port to 5001 in <code class="inline">app.py</code>, use <code class="inline">http://localhost:5001</code>.</li>
+            <li>You're using <code class="inline">http://localhost:5001</code>, not <code class="inline">https://</code>. (No s.)</li>
+            <li>You used port <strong>5001</strong>, not 5000 (Step 4b).</li>
+            <li>If the page is blank and macOS, AirPlay Receiver may be answering on 5000. That's why we switched to 5001, double-check Step 4b actually saved.</li>
           </ol>
 
           <h3 id="tb-quote-username">Step 5: Register fails with "You have an error in your SQL syntax"</h3>
