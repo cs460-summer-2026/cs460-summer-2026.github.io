@@ -3,12 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Boston University CS460 Introduction to Database Systems — Summer 2026 — Lab 3">
-  <title>Lab 3 — CS460 Summer 2026</title>
+  <meta name="description" content="Boston University CS460 Introduction to Database Systems, Summer 2026, Lab 3: Run the VERSUS skeleton code for PA1.">
+  <title>Lab 3: Run the PA1 Skeleton (VERSUS) | CS460</title>
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -18,15 +17,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
 
-  <meta property="og:title" content="Lab 3 — CS460 Summer 2026">
+  <meta property="og:title" content="Lab 3: Run the PA1 Skeleton (VERSUS) | CS460">
   <meta property="og:type" content="article">
 </head>
 
 <body data-page="lab">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- ===== Global Navigation ===== -->
   <nav class="nav" aria-label="Primary">
     <div class="nav__inner">
       <a class="nav__title" href="index.html">
@@ -64,77 +64,414 @@
     </div>
   </nav>
 
-  <!-- ===== Hero ===== -->
   <header class="hero">
-    <h1 class="hero__title">Lab 3</h1>
+    <h1 class="hero__title hero__title--lab">Lab 3<span class="hero__subtitle">Run the PA1 Skeleton (VERSUS)</span></h1>
   </header>
 
-  <!-- ===== Main ===== -->
   <main id="main" class="lab-layout">
 
-    <!-- Sidebar TOC (desktop) -->
     <aside class="toc" aria-label="Table of contents">
       <p class="toc__label">On this page</p>
       <ul class="toc__list">
-        <li><a href="#overview">1. Overview</a></li>
-        <li><a href="#concepts">2. Concepts</a></li>
-        <li><a href="#walkthrough">3. Walkthrough</a></li>
-        <li><a href="#examples">4. Examples</a></li>
+        <li><a href="#get-code">1. Get the code</a></li>
+        <li><a href="#install">2. Install packages</a></li>
+        <li><a href="#database">3. Create the database</a></li>
+        <li><a href="#run">4. Run the app</a></li>
+        <li><a href="#check">5. Try it in the browser</a></li>
+        <li><a href="#forms">6. How forms work</a></li>
+        <li><a href="#done">You're done when…</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
       </ul>
     </aside>
 
-    <!-- Content column -->
     <div class="lab-content">
 
       <details class="toc-mobile">
         <summary>On this page ▾</summary>
         <ul>
-          <li><a href="#overview">1. Overview</a></li>
-          <li><a href="#concepts">2. Concepts</a></li>
-          <li><a href="#walkthrough">3. Walkthrough</a></li>
-          <li><a href="#examples">4. Examples</a></li>
+          <li><a href="#get-code">1. Get the code</a></li>
+          <li><a href="#install">2. Install packages</a></li>
+          <li><a href="#database">3. Create the database</a></li>
+          <li><a href="#run">4. Run the app</a></li>
+          <li><a href="#check">5. Try it in the browser</a></li>
+          <li><a href="#forms">6. How forms work</a></li>
+          <li><a href="#done">You're done when…</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
         </ul>
       </details>
 
-      <section id="overview" class="lab-section">
-        <h2 class="section-title">1. Overview</h2>
+      <aside class="callout">
+        <span class="callout__label">Read this first</span>
+        <p>Goal: get the VERSUS skeleton running at <code class="inline">localhost:5000</code> where you can register, log in, create a bracket, and view it. That's the starting point for PA1.</p>
+        <p>You need MySQL working from <a href="lab-2.html">Lab 2</a>. If it isn't, fix that with <a href="lab-2.html#troubleshooting">Lab 2 Troubleshooting</a> before continuing.</p>
+        <p><strong>Each step has a green "Check it worked" box.</strong> Don't skip ahead until your output matches. If it doesn't, find your error in <a href="#troubleshooting">Troubleshooting</a> at the bottom.</p>
+        <p><strong>Windows users:</strong> use <strong>PowerShell</strong>, not the old Command Prompt. Most commands assume PowerShell.</p>
+      </aside>
+
+      <!-- ============================================
+           SECTION 1 - GET THE CODE
+           ============================================ -->
+      <section id="get-code" class="lab-section">
+        <h2 class="section-title">1. Get the code</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>Download <code class="inline">samplecode.zip</code> from Piazza.</p>
+
+          <p class="os-tag">macOS</p>
+          <p>Safari unzips automatically. Move the resulting <code class="inline">samplecode</code> folder to your Desktop so the path is short and predictable.</p>
+
+          <p class="os-tag">Windows</p>
+          <p>Right-click the downloaded zip in File Explorer → <em>Extract All…</em> → choose your Desktop. <strong>Important:</strong> Windows often creates an extra folder layer. After extracting you may have <code class="inline">Desktop\samplecode\samplecode\app.py</code>. If so, drag the inner <code class="inline">samplecode</code> up one level so <code class="inline">app.py</code> sits directly inside <code class="inline">Desktop\samplecode</code>.</p>
+
+          <p>Now open a terminal and cd into the folder.</p>
+
+          <p class="os-tag">macOS</p>
+<pre><code class="language-bash">cd ~/Desktop/samplecode</code></pre>
+
+          <p class="os-tag">Windows (PowerShell)</p>
+<pre><code class="language-bash">cd $HOME\Desktop\samplecode</code></pre>
+
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>Run <code class="inline">ls</code> (macOS) or <code class="inline">dir</code> (Windows). You should see <code class="inline">app.py</code>, <code class="inline">schema.sql</code>, <code class="inline">requirements.txt</code>, and a <code class="inline">templates</code> folder, all at the top level.</p>
+          </div>
+
+          <p class="fixhint">Don't see <code class="inline">app.py</code> at this level? See <a href="#tb-nested-folder">nested folder fix</a>.</p>
+
         </div>
       </section>
 
-      <section id="concepts" class="lab-section lab-section--alt">
-        <h2 class="section-title">2. Concepts</h2>
+      <!-- ============================================
+           SECTION 2 - INSTALL PACKAGES
+           ============================================ -->
+      <section id="install" class="lab-section lab-section--alt">
+        <h2 class="section-title">2. Install packages</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>The skeleton needs three Python libraries listed in <code class="inline">requirements.txt</code>: Flask, the MySQL connector, and Flask-Login.</p>
+
+          <h3>2a. Activate your virtual environment</h3>
+
+          <p>Reuse the <code class="inline">cs460env</code> from Lab 2. If your terminal prompt already starts with <code class="inline">(cs460env)</code>, skip to 2b.</p>
+
+          <p class="os-tag">macOS</p>
+<pre><code class="language-bash">source ~/Desktop/cs460env/bin/activate</code></pre>
+          <p>If you put the venv somewhere else in Lab 2, use that path. If you can't find it, just make a new one:</p>
+<pre><code class="language-bash">python3 -m venv ~/Desktop/cs460env
+source ~/Desktop/cs460env/bin/activate</code></pre>
+
+          <p class="os-tag">Windows (PowerShell)</p>
+<pre><code class="language-bash">$HOME\Desktop\cs460env\Scripts\Activate.ps1</code></pre>
+          <p>If you don't have one yet:</p>
+<pre><code class="language-bash">python -m venv $HOME\Desktop\cs460env
+$HOME\Desktop\cs460env\Scripts\Activate.ps1</code></pre>
+
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>Your prompt now starts with <code class="inline">(cs460env)</code>.</p>
+          </div>
+
+          <p class="fixhint">PowerShell error <em>"running scripts is disabled"</em>? See <a href="#tb-execpolicy">execution policy fix</a>. <em>"pip not found"</em> later? See <a href="#tb-pip-not-found">pip fix</a>.</p>
+
+          <h3>2b. Install the packages</h3>
+<pre><code class="language-bash">pip install -r requirements.txt</code></pre>
+
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>The output ends with <code class="inline">Successfully installed Flask-3.x flask-login-0.6.x mysql-connector-python-9.x</code>. No red error lines.</p>
+          </div>
+
+          <p class="fixhint">Got <em>externally-managed-environment</em>? See <a href="#tb-pep668">venv not active</a>. Got a wheel/build error? See <a href="#tb-wheel-build">build error fix</a>.</p>
+
         </div>
       </section>
 
-      <section id="walkthrough" class="lab-section">
-        <h2 class="section-title">3. Walkthrough</h2>
+      <!-- ============================================
+           SECTION 3 - CREATE THE DATABASE
+           ============================================ -->
+      <section id="database" class="lab-section">
+        <h2 class="section-title">3. Create the database</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>The skeleton ships with <code class="inline">schema.sql</code>, which creates a database called <code class="inline">versus</code> with four tables. Pick one of the two methods below.</p>
+
+          <aside class="callout">
+            <span class="callout__label">Heads up</span>
+            <p>The first line of <code class="inline">schema.sql</code> is <code class="inline">DROP DATABASE IF EXISTS versus;</code>. If you already have a database called <code class="inline">versus</code>, running this will <strong>delete it and everything in it</strong>. That's fine for a fresh start, but don't run this against a database you care about.</p>
+          </aside>
+
+          <h3>Method A. Workbench (works the same on Mac and Windows)</h3>
+          <ol>
+            <li>Open Workbench and connect to your local server (the <em>Local instance</em> tile, same as Lab 2).</li>
+            <li>Top menu: <em>File → Open SQL Script…</em> and pick <code class="inline">schema.sql</code> from the <code class="inline">samplecode</code> folder.</li>
+            <li>Click the <strong>lightning-bolt</strong> button at the top of the editor to run the whole script.</li>
+            <li>Right-click <em>SCHEMAS</em> in the Navigator → <em>Refresh All</em>. <code class="inline">versus</code> appears.</li>
+          </ol>
+
+          <h3>Method B. Terminal</h3>
+
+          <p class="os-tag">macOS</p>
+<pre><code class="language-bash">mysql -u root -p &lt; schema.sql</code></pre>
+          <p>Type your MySQL root password (or press Enter if it's blank).</p>
+
+          <p class="os-tag">Windows (PowerShell)</p>
+          <p>PowerShell does <strong>not</strong> support <code class="inline">&lt;</code> for input redirection. Use this instead:</p>
+<pre><code class="language-bash">Get-Content schema.sql | mysql -u root -p</code></pre>
+
+          <h3>3c. Confirm the tables exist</h3>
+
+          <p>Open Workbench OR connect from the terminal:</p>
+<pre><code class="language-bash">mysql -u root -p</code></pre>
+          <p>Then run:</p>
+<pre><code class="language-sql">USE versus;
+SHOW TABLES;</code></pre>
+
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>You should see four tables:</p>
+<pre><code class="language-none">Brackets
+Entrants
+Matchups
+Users</code></pre>
+          </div>
+
+          <p class="fixhint">"mysql is not recognized" / "command not found"? See <a href="lab-2.html#tb-path">Lab 2 PATH fix</a>. PowerShell complains about <code class="inline">&lt;</code>? See <a href="#tb-ps-redirect">PowerShell redirection fix</a>. "Access denied" loading the schema? See <a href="#tb-schema-denied">wrong password fix</a>. <code class="inline">SHOW TABLES</code> empty? See <a href="#tb-no-tables">empty database fix</a>.</p>
+
         </div>
       </section>
 
-      <section id="examples" class="lab-section lab-section--alt">
-        <h2 class="section-title">4. Examples</h2>
+      <!-- ============================================
+           SECTION 4 - RUN THE APP
+           ============================================ -->
+      <section id="run" class="lab-section lab-section--alt">
+        <h2 class="section-title">4. Run the app</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <h3>4a. Edit your MySQL password into app.py</h3>
+
+          <p>Open <code class="inline">app.py</code> in any text editor (VS Code, Sublime, even TextEdit if you set Format → Make Plain Text). Near the top, you'll see:</p>
+
+<pre><code class="language-python">DB_USER     = 'root'
+DB_PASSWORD = 'CHANGE_ME'
+DB_NAME     = 'versus'
+DB_HOST     = 'localhost'</code></pre>
+
+          <p>Replace <code class="inline">'CHANGE_ME'</code> with your actual MySQL root password. Keep the surrounding single quotes.</p>
+
+          <ul>
+            <li>If your password is <code class="inline">cs460pw</code>: <code class="inline">DB_PASSWORD = 'cs460pw'</code></li>
+            <li>If your password is blank (Lab 2 Homebrew default): <code class="inline">DB_PASSWORD = ''</code> (two single quotes, nothing between)</li>
+            <li>If your password contains a single quote like <code class="inline">it's</code>: use double quotes instead → <code class="inline">DB_PASSWORD = "it's"</code></li>
+          </ul>
+
+          <p>Save the file.</p>
+
+          <h3>4b. Run the app</h3>
+
+          <p>Back in your terminal (still inside the venv, still in the <code class="inline">samplecode</code> folder):</p>
+
+<pre><code class="language-bash">python app.py</code></pre>
+
+          <p>On macOS if <code class="inline">python</code> isn't found, use <code class="inline">python3 app.py</code>. (Inside an activated venv, both work.)</p>
+
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>You should see output ending like this, and the terminal does NOT return to a prompt:</p>
+<pre><code class="language-none"> * Serving Flask app 'app'
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit</code></pre>
+            <p>That's the server running. Leave the terminal alone, don't close it.</p>
+          </div>
+
+          <p class="fixhint">Errors? <a href="#tb-module-error">ModuleNotFoundError</a>, <a href="#tb-db-denied">database access denied</a>, <a href="#tb-unknown-db">unknown database 'versus'</a>, <a href="#tb-port">port 5000 in use</a>, <a href="#tb-airplay">macOS AirPlay using port 5000</a>, <a href="#tb-template-not-found">TemplateNotFound</a>.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           SECTION 5 - TRY IT IN THE BROWSER
+           ============================================ -->
+      <section id="check" class="lab-section">
+        <h2 class="section-title">5. Try it in the browser</h2>
+        <div class="section-body">
+
+          <p>Open a browser and go to <a href="http://localhost:5000" target="_blank" rel="noopener">http://localhost:5000</a>. The VERSUS home page should load.</p>
+
+          <p>Click through these in order:</p>
+          <ol>
+            <li>Click <strong>Register</strong>. Pick a username, use any email (the browser checks the @ format), pick a password. Submit.</li>
+            <li>You should land on a "welcome to VERSUS" page logged in as your new user.</li>
+            <li>Click <strong>Create a bracket</strong>. Give it a title. Leave <em>entrant count</em> at 8. Fill in all 8 entrant names (any words work). Submit.</li>
+            <li>You should land on the bracket page showing 7 matchups total: 4 in round 1 (with both entrants filled in), 2 in round 2 (TBD), 1 in round 3 (TBD).</li>
+            <li>Click <strong>Browse brackets</strong>. Your bracket appears in the list.</li>
+          </ol>
+
+          <div class="expect">
+            <span class="expect__label">Check it worked</span>
+            <p>Register, create-bracket, and browse all worked. Lab 3 is complete.</p>
+          </div>
+
+          <p>To stop the server: switch to the terminal running <code class="inline">python app.py</code> and press <code class="inline">Ctrl+C</code>.</p>
+
+          <p class="fixhint">Page won't load? <a href="#tb-blank-page">browser shows nothing</a>. Register fails? <a href="#tb-quote-username">apostrophe in username</a>. Create bracket fails? <a href="#tb-bracket-fields">missing entrant fields</a>.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           SECTION 6 - HOW FORMS WORK
+           ============================================ -->
+      <section id="forms" class="lab-section lab-section--alt">
+        <h2 class="section-title">6. How forms work</h2>
+        <div class="section-body">
+
+          <p>You'll be writing more forms as you add features to VERSUS (predictions, votes, comments). The pattern is small and worth understanding now.</p>
+
+          <h3>The HTML side</h3>
+          <p>Open <code class="inline">templates/register.html</code>. It's a form with three input fields:</p>
+
+<pre><code class="language-html">&lt;form action='/register' method='post'&gt;
+  &lt;input type='text'     name='username' required /&gt;
+  &lt;input type='email'    name='email'    required /&gt;
+  &lt;input type='password' name='password' required /&gt;
+  &lt;input type='submit'   value='Register' /&gt;
+&lt;/form&gt;</code></pre>
+
+          <p><code class="inline">action='/register'</code> says where to send the form data. <code class="inline">method='post'</code> says how. The <code class="inline">name</code> on each input is the key Flask uses to read that field.</p>
+
+          <h3>The Flask side</h3>
+          <p>In <code class="inline">app.py</code>, the <code class="inline">register_user()</code> function handles the POST:</p>
+
+<pre><code class="language-python">username = request.form.get('username')
+email    = request.form.get('email')
+password = request.form.get('password')</code></pre>
+
+          <p>Each <code class="inline">request.form.get('xxx')</code> matches an <code class="inline">name='xxx'</code> in the HTML. That's the whole link between the two files.</p>
+
+          <p>Same pattern everywhere: HTML form with <code class="inline">name</code>s, Flask route reads them with <code class="inline">request.form.get</code>.</p>
+
+          <p>More: <a href="https://www.w3schools.com/html/html_forms.asp" target="_blank" rel="noopener">HTML forms (w3schools)</a>, <a href="https://flask.palletsprojects.com/en/stable/quickstart/" target="_blank" rel="noopener">Flask quickstart</a>.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           DONE CHECKLIST
+           ============================================ -->
+      <section id="done" class="lab-section">
+        <h2 class="section-title">You're done when…</h2>
+        <div class="section-body">
+
+          <ol>
+            <li><code class="inline">SHOW TABLES;</code> on the <code class="inline">versus</code> database lists Brackets, Entrants, Matchups, Users.</li>
+            <li><code class="inline">python app.py</code> prints "Running on http://127.0.0.1:5000" with no errors.</li>
+            <li>You registered an account and landed on the welcome page.</li>
+            <li>You created an 8-entrant bracket and the view page showed 7 matchups.</li>
+          </ol>
+
+          <p>All four green? You're set. PA1 builds on this skeleton, your README lists what comes next.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           TROUBLESHOOTING
+           ============================================ -->
+      <section id="troubleshooting" class="lab-section lab-section--alt">
+        <h2 class="section-title">Troubleshooting</h2>
+        <div class="section-body">
+
+          <p>Find your error below. Anything MySQL-only is in <a href="lab-2.html#troubleshooting">Lab 2 Troubleshooting</a>.</p>
+
+          <h3 id="tb-nested-folder">Step 1: I cd'd in but don't see <code class="inline">app.py</code></h3>
+          <p>Windows often creates a double-nested folder when extracting (<code class="inline">samplecode\samplecode\app.py</code>). Run <code class="inline">dir</code>, and if you see another <code class="inline">samplecode</code> folder, cd into it: <code class="inline">cd samplecode</code>. Now <code class="inline">app.py</code> should be there.</p>
+
+          <h3 id="tb-execpolicy">Step 2: PowerShell says "running scripts is disabled on this system"</h3>
+          <p>PowerShell blocks venv activation by default. Allow it for your user only (safe):</p>
+<pre><code class="language-bash">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></pre>
+          <p>Type <code class="inline">Y</code> and press Enter when it asks. Then try the activate command again. You only need to do this once per machine.</p>
+
+          <h3 id="tb-pip-not-found">Step 2: "pip not found" or "pip is not recognized"</h3>
+          <p>Your venv isn't activated. Re-run the activate command, confirm your prompt shows <code class="inline">(cs460env)</code>, then retry. If pip is still missing inside the venv, use <code class="inline">python -m pip install -r requirements.txt</code>.</p>
+
+          <h3 id="tb-pep668">Step 2: "error: externally-managed-environment"</h3>
+          <p>You ran pip outside the venv. Activate it (see 2a) so your prompt shows <code class="inline">(cs460env)</code>, then retry the install.</p>
+
+          <h3 id="tb-wheel-build">Step 2: pip says "building wheel failed" or compilation errors</h3>
+          <p>Brand-new Python releases sometimes lack pre-built wheels for the MySQL connector. Force binary-only install:</p>
+<pre><code class="language-bash">pip install --only-binary :all: -r requirements.txt</code></pre>
+          <p>If that still fails, install Python 3.12 from <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org</a> and rebuild the venv with <code class="inline">python3.12 -m venv ...</code> instead.</p>
+
+          <h3 id="tb-ps-redirect">Step 3: PowerShell error <em>"The '&lt;' operator is reserved"</em></h3>
+          <p>PowerShell doesn't support <code class="inline">&lt;</code> for input redirection. Use the pipe form:</p>
+<pre><code class="language-bash">Get-Content schema.sql | mysql -u root -p</code></pre>
+          <p>Or just load the file in Workbench (Method A in Step 3).</p>
+
+          <h3 id="tb-schema-denied">Step 3: "Access denied for user 'root'" when loading the schema</h3>
+          <p>Wrong MySQL root password. Retype carefully. If you genuinely forgot it, reinstall MySQL with a memorable password (Lab 2 Troubleshooting under "Access denied").</p>
+
+          <h3 id="tb-no-tables">Step 3: SHOW TABLES is empty</h3>
+          <p>You're connected but not inside <code class="inline">versus</code>. Run <code class="inline">USE versus;</code> first, then <code class="inline">SHOW TABLES;</code>. If <code class="inline">SHOW DATABASES;</code> doesn't list <code class="inline">versus</code> at all, the schema didn't actually run, scroll back through the load output for the real error.</p>
+
+          <h3 id="tb-module-error">Step 4: "ModuleNotFoundError: No module named 'flask'" or "mysql"</h3>
+          <p>The venv isn't active, or you installed into the wrong Python. Re-activate it, reinstall, then run:</p>
+<pre><code class="language-bash">source ~/Desktop/cs460env/bin/activate            # macOS
+$HOME\Desktop\cs460env\Scripts\Activate.ps1       # Windows PowerShell
+pip install -r requirements.txt
+python app.py</code></pre>
+
+          <h3 id="tb-db-denied">Step 4: "mysql.connector.errors.ProgrammingError: 1045 Access denied"</h3>
+          <p>The password in <code class="inline">DB_PASSWORD</code> doesn't match your real MySQL root password. Open <code class="inline">app.py</code>, fix the password between the single quotes, save, re-run. A blank password is <code class="inline">DB_PASSWORD = ''</code> (two quotes, nothing between).</p>
+
+          <h3 id="tb-unknown-db">Step 4: "Unknown database 'versus'"</h3>
+          <p>The schema didn't run. Go back to Step 3. Confirm with <code class="inline">SHOW DATABASES;</code> that <code class="inline">versus</code> exists before retrying.</p>
+
+          <h3 id="tb-port">Step 4: "Address already in use" on port 5000</h3>
+          <p>Either you already have a copy of the app running in another terminal (find it, Ctrl+C), or change the port. Open <code class="inline">app.py</code>, find the last line, change <code class="inline">app.run(port=5000, debug=True)</code> to <code class="inline">app.run(port=5001, debug=True)</code>, save, re-run, and use <code class="inline">http://localhost:5001</code> in the browser.</p>
+
+          <h3 id="tb-airplay">Step 4 (macOS): port 5000 used by AirPlay Receiver</h3>
+          <p>macOS Monterey+ uses port 5000 for AirPlay Receiver. Two options:</p>
+          <ul>
+            <li>Disable AirPlay Receiver: <em>System Settings → General → AirDrop &amp; Handoff</em>, turn off <em>AirPlay Receiver</em>.</li>
+            <li>Or change Flask to a different port, same as the entry above.</li>
+          </ul>
+
+          <h3 id="tb-template-not-found">Step 4: "jinja2.exceptions.TemplateNotFound: hello.html"</h3>
+          <p>You ran <code class="inline">python app.py</code> from the wrong folder. The <code class="inline">templates/</code> folder must sit right next to <code class="inline">app.py</code> in your current directory. <code class="inline">cd</code> back into the <code class="inline">samplecode</code> folder and try again.</p>
+
+          <h3 id="tb-blank-page">Step 5: Browser shows "This site can't be reached" or blank</h3>
+          <p>Three things to check, in order:</p>
+          <ol>
+            <li>Is <code class="inline">python app.py</code> still running in your terminal? If it returned to the prompt, the server crashed, scroll up for the error.</li>
+            <li>You're using <code class="inline">http://localhost:5000</code>, not <code class="inline">https://</code>. (No s.)</li>
+            <li>If you changed the port to 5001 in <code class="inline">app.py</code>, use <code class="inline">http://localhost:5001</code>.</li>
+          </ol>
+
+          <h3 id="tb-quote-username">Step 5: Register fails with "You have an error in your SQL syntax"</h3>
+          <p>You used an apostrophe in your username or password (e.g. <code class="inline">O'Brien</code>). The skeleton uses simple string-interpolated SQL which breaks on quotes, this is a known limitation of the teaching code, we'll fix it later in the course. For now use a username without single quotes.</p>
+
+          <h3 id="tb-bracket-fields">Step 5: Create-bracket form refuses to submit</h3>
+          <p>You changed the entrant count dropdown but didn't fill in every numbered seed field. The browser is silently blocking submission because some <code class="inline">required</code> fields are empty. Scroll the form and make sure every Seed line has text.</p>
+
+          <h3 id="tb-stop-server">How do I stop the server?</h3>
+          <p>Switch to the terminal running <code class="inline">python app.py</code> and press <code class="inline">Ctrl+C</code>. If that doesn't work (rare on Windows): close the whole terminal window.</p>
+
+          <h3 id="tb-restart-after-edit">I edited app.py but my changes aren't showing</h3>
+          <p>Debug mode auto-reloads on most changes, but big edits (changing imports, adding routes) sometimes need a manual restart. Ctrl+C the server, run <code class="inline">python app.py</code> again, reload the browser.</p>
+
         </div>
       </section>
 
     </div>
   </main>
 
-  <!-- ===== Footer ===== -->
   <footer class="footer">
     <div class="footer__inner">
       CS460 Summer 2026 &middot; Boston University
     </div>
   </footer>
 
-  <!-- ===== Search Overlay ===== -->
   <div id="search-overlay" class="search-overlay" role="dialog" aria-modal="true" aria-label="Search">
     <div class="search__bar">
       <button class="search__back" type="button" aria-label="Close search">
