@@ -115,21 +115,21 @@
         <h2 class="section-title">1. Get the code</h2>
         <div class="section-body">
 
-          <p>Download <code class="inline">samplecode.zip</code> from Piazza.</p>
+          <p>Download <code class="inline">samplecode.zip</code> from Piazza. When you unzip it, the folder inside is named <code class="inline">versus_skeleton</code>, that's the one you'll work in.</p>
 
           <p class="os-tag">macOS</p>
-          <p>Safari unzips automatically. Move the resulting <code class="inline">samplecode</code> folder to your Desktop so the path is short and predictable.</p>
+          <p>Safari unzips automatically. Move the resulting <code class="inline">versus_skeleton</code> folder to your Desktop so the path is short and predictable.</p>
 
           <p class="os-tag">Windows</p>
-          <p>Right-click the downloaded zip in File Explorer → <em>Extract All…</em> → choose your Desktop. <strong>Important:</strong> Windows often creates an extra folder layer. After extracting you may have <code class="inline">Desktop\samplecode\samplecode\app.py</code>. If so, drag the inner <code class="inline">samplecode</code> up one level so <code class="inline">app.py</code> sits directly inside <code class="inline">Desktop\samplecode</code>.</p>
+          <p>Right-click the downloaded zip in File Explorer → <em>Extract All…</em> → choose your Desktop. <strong>Important:</strong> Windows often creates an extra folder layer. After extracting you may have <code class="inline">Desktop\versus_skeleton\versus_skeleton\app.py</code>. If so, drag the inner <code class="inline">versus_skeleton</code> up one level so <code class="inline">app.py</code> sits directly inside <code class="inline">Desktop\versus_skeleton</code>.</p>
 
           <p>Now open a terminal and cd into the folder.</p>
 
           <p class="os-tag">macOS</p>
-<pre><code class="language-bash">cd ~/Desktop/samplecode</code></pre>
+<pre><code class="language-bash">cd ~/Desktop/versus_skeleton</code></pre>
 
           <p class="os-tag">Windows (PowerShell)</p>
-<pre><code class="language-bash">cd $HOME\Desktop\samplecode</code></pre>
+<pre><code class="language-bash">cd $HOME\Desktop\versus_skeleton</code></pre>
 
           <p class="fixhint">Don't see <code class="inline">app.py</code> when you <code class="inline">ls</code> / <code class="inline">dir</code>? See <a href="#tb-nested-folder">nested folder fix</a>.</p>
 
@@ -190,7 +190,7 @@ $HOME\Desktop\cs460env\Scripts\Activate.ps1</code></pre>
           <h3>Method A. Workbench (works the same on Mac and Windows)</h3>
           <ol>
             <li>Open Workbench and connect to your local server (the <em>Local instance</em> tile, same as Lab 2).</li>
-            <li>Top menu: <em>File → Open SQL Script…</em> and pick <code class="inline">schema.sql</code> from the <code class="inline">samplecode</code> folder.</li>
+            <li>Top menu: <em>File → Open SQL Script…</em> and pick <code class="inline">schema.sql</code> from the <code class="inline">versus_skeleton</code> folder.</li>
             <li>Click the <strong>lightning-bolt</strong> button at the top of the editor to run the whole script.</li>
             <li>Right-click <em>SCHEMAS</em> in the Navigator → <em>Refresh All</em>. <code class="inline">versus</code> appears.</li>
           </ol>
@@ -247,7 +247,7 @@ DB_HOST     = 'localhost'</code></pre>
 
           <h3>4b. Run the app</h3>
 
-          <p>Back in your terminal (still inside the venv, still in the <code class="inline">samplecode</code> folder):</p>
+          <p>Back in your terminal (still inside the venv, still in the <code class="inline">versus_skeleton</code> folder):</p>
 
 <pre><code class="language-bash">python app.py</code></pre>
 
@@ -353,7 +353,7 @@ password = request.form.get('password')</code></pre>
           <p>Find your error below. Anything MySQL-only is in <a href="lab-2.html#troubleshooting">Lab 2 Troubleshooting</a>.</p>
 
           <h3 id="tb-nested-folder">Step 1: I cd'd in but don't see <code class="inline">app.py</code></h3>
-          <p>Windows often creates a double-nested folder when extracting (<code class="inline">samplecode\samplecode\app.py</code>). Run <code class="inline">dir</code>, and if you see another <code class="inline">samplecode</code> folder, cd into it: <code class="inline">cd samplecode</code>. Now <code class="inline">app.py</code> should be there.</p>
+          <p>Windows often creates a double-nested folder when extracting (<code class="inline">versus_skeleton\versus_skeleton\app.py</code>). Run <code class="inline">dir</code>, and if you see another <code class="inline">versus_skeleton</code> folder, cd into it: <code class="inline">cd versus_skeleton</code>. Now <code class="inline">app.py</code> should be there.</p>
 
           <h3 id="tb-execpolicy">Step 2: PowerShell says "running scripts is disabled on this system"</h3>
           <p>PowerShell blocks venv activation by default. Allow it for your user only (safe):</p>
@@ -406,7 +406,7 @@ python app.py</code></pre>
           </ul>
 
           <h3 id="tb-template-not-found">Step 4: "jinja2.exceptions.TemplateNotFound: hello.html"</h3>
-          <p>You ran <code class="inline">python app.py</code> from the wrong folder. The <code class="inline">templates/</code> folder must sit right next to <code class="inline">app.py</code> in your current directory. <code class="inline">cd</code> back into the <code class="inline">samplecode</code> folder and try again.</p>
+          <p>You ran <code class="inline">python app.py</code> from the wrong folder. The <code class="inline">templates/</code> folder must sit right next to <code class="inline">app.py</code> in your current directory. <code class="inline">cd</code> back into the <code class="inline">versus_skeleton</code> folder and try again.</p>
 
           <h3 id="tb-blank-page">Step 5: Browser shows "This site can't be reached" or blank</h3>
           <p>Three things to check, in order:</p>
