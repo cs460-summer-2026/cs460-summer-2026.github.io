@@ -662,6 +662,19 @@ pre[class*="language-"] {
   margin: 0 0 var(--space-4);
 }
 
+/* Tree-state / FD-state monospace blocks shown after a reveal */
+.section-body pre.state {
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-left: 3px solid var(--color-brick);
+  font-size: var(--text-small);
+  line-height: 1.45;
+  padding: var(--space-3) var(--space-4);
+  margin: var(--space-2) 0 var(--space-3);
+  white-space: pre;
+  overflow-x: auto;
+}
+
 /* Stacked-data wrap: lets multiple small relation tables sit side-by-side on wide screens */
 .section-body .data-grid {
   display: grid;
