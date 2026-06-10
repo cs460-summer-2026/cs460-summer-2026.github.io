@@ -72,6 +72,7 @@
       <p class="toc__label">On this page</p>
       <ul class="toc__list">
         <li><a href="#reference">Quick reference</a></li>
+        <li><a href="#concepts">The ideas, intuitively</a></li>
         <li><a href="#nf">1. Normal Forms</a></li>
         <li><a href="#bptree">2. B+ Trees</a></li>
         <li><a href="#troubleshooting">Common mistakes</a></li>
@@ -84,6 +85,7 @@
         <summary>On this page ▾</summary>
         <ul>
           <li><a href="#reference">Quick reference</a></li>
+          <li><a href="#concepts">The ideas, intuitively</a></li>
           <li><a href="#nf">1. Normal Forms</a></li>
           <li><a href="#bptree">2. B+ Trees</a></li>
           <li><a href="#troubleshooting">Common mistakes</a></li>
@@ -128,9 +130,138 @@
       </section>
 
       <!-- ============================================
+           CONCEPTS / INTUITION
+           ============================================ -->
+      <section id="concepts" class="lab-section lab-section--alt">
+        <h2 class="section-title">The ideas, intuitively</h2>
+        <div class="section-body">
+
+          <p>Both halves of today's lab look like notation games until you see what the notation is protecting you from. A few pictures before the practice.</p>
+
+          <h3>Part 1: why we decompose tables</h3>
+
+          <p>Imagine a single table that records, for every CS460 student, their name, their major, and their advisor:</p>
+
+<pre class="state">Students (name, major, advisor)
+
+  Alice     CS    Prof. Kim
+  Bob       CS    Prof. Kim
+  Carla     CS    Prof. Kim
+  Dan       Math  Prof. Ng
+  Eve       Math  Prof. Ng</pre>
+
+          <p>Prof. Kim's name is written down three times. That's the same fact, stored three times. Now suppose Prof. Kim leaves and a new CS advisor is appointed. You'd better remember to update <em>all three</em> rows. Miss one and your table now claims CS has two advisors at the same time.</p>
+
+          <p>This is the disease normal forms cure. The redundancy isn't ugly, it's <em>dangerous</em>: it lets the database contradict itself.</p>
+
+          <div class="concept-grid">
+            <div class="concept">
+              <span class="concept__label">The arrow</span>
+              <h4>FD: X → Y</h4>
+              <p>"Knowing X is enough to know Y." In the table above, <code class="inline">major → advisor</code>: tell me the major, I'll tell you the advisor. No need to look at the name.</p>
+            </div>
+            <div class="concept">
+              <span class="concept__label">The key</span>
+              <h4>What identifies a row?</h4>
+              <p>A <strong>candidate key</strong> is a minimal set of columns that pins down every other column. In the table above the candidate key is just <code class="inline">name</code>, because each name is unique.</p>
+            </div>
+            <div class="concept">
+              <span class="concept__label">The rule</span>
+              <h4>BCNF in one line</h4>
+              <p>"The only way to have an arrow is to start from a key." Every FD <code class="inline">X → Y</code> in the table must have X as a superkey. <code class="inline">major → advisor</code> breaks this, because <code class="inline">major</code> is not a key.</p>
+            </div>
+            <div class="concept">
+              <span class="concept__label">The fix</span>
+              <h4>Split out the arrow</h4>
+              <p>Move the offending FD into its own little table. We end up with <code class="inline">(name, major)</code> and <code class="inline">(major, advisor)</code>. Now Prof. Kim's name lives in <em>one</em> place.</p>
+            </div>
+          </div>
+
+          <p>After the split:</p>
+
+<pre class="state">Students (name, major)        Advisors (major, advisor)
+
+  Alice  CS                     CS    Prof. Kim
+  Bob    CS                     Math  Prof. Ng
+  Carla  CS
+  Dan    Math
+  Eve    Math</pre>
+
+          <p>Prof. Kim's name appears once. To change CS's advisor you update one row. To reconstruct the original table, join on <code class="inline">major</code>. <strong>The mechanical recipe you'll practice is just: find an arrow whose left side isn't a key, split the table along that arrow, repeat until no bad arrows remain.</strong></p>
+
+          <h3>Part 2: why B+ trees, and what a "node" really is</h3>
+
+          <p>A database table sits on disk. Disk is slow. Every time you touch the disk you wait roughly ten million times longer than a CPU operation. So when you ask "find the student with ID 31415," the database does not scan every row. It walks a B+ tree.</p>
+
+          <p>A B+ tree is best understood as a <strong>signpost system</strong>. You start at the top and at every level the signpost tells you which way to go. You go that way. After two or three signposts you've arrived. Every disk read along the way is a node.</p>
+
+          <div class="concept-grid">
+            <div class="concept">
+              <span class="concept__label">The shape</span>
+              <h4>Wide, not tall</h4>
+              <p>Each node holds many keys (in our lab, up to 4). Branching factor stays high, so the tree only needs a handful of levels even for millions of rows. A height-3 tree with 100 keys per node can index a million rows.</p>
+            </div>
+            <div class="concept">
+              <span class="concept__label">The signpost</span>
+              <h4>Index nodes are routers</h4>
+              <p>An index node says "smaller than 31, go left; between 31 and 54, go middle; bigger than 54, go right." The numbers in the index are routing labels, not data.</p>
+            </div>
+            <div class="concept">
+              <span class="concept__label">The data</span>
+              <h4>Leaves hold the real keys</h4>
+              <p>The bottom row of the tree, the <em>leaves</em>, is where every key actually lives. The index above is built only to help you find the right leaf fast.</p>
+            </div>
+            <div class="concept">
+              <span class="concept__label">The trick</span>
+              <h4>Always balanced</h4>
+              <p>By forcing every node to hold between <em>d</em> and <em>2d</em> keys, the tree can never go lopsided. Whichever leaf you're searching for is the same distance from the root.</p>
+            </div>
+          </div>
+
+          <p>A picture. Two index levels routing you to the right leaf:</p>
+
+<pre class="state">                  [ 31 | 54 ]
+                  /    |     \
+                 /     |      \
+        [ 16 | 24 ]  [31|49]  [54|76|85]
+        leaves  (every actual key lives here)</pre>
+
+          <p>To look up 49: at the root, 49 is between 31 and 54, so go middle. At the leaf, 49 is right there. <strong>Two disk reads to find one row out of millions.</strong> That's the whole point of the tree.</p>
+
+          <h3>Insertion: why splits happen</h3>
+
+          <p>A node has a maximum capacity (4 keys in this lab). Insert a key into a leaf that's already full and you have 5 keys, one too many. The leaf <strong>splits in half</strong> and the new neighbour leaf needs to be findable from above, so its smallest key is added to the parent index node as a new signpost.</p>
+
+          <div class="concept-grid">
+            <div class="concept">
+              <span class="concept__label">Leaves: copy up</span>
+              <h4>The key stays in the leaf</h4>
+              <p>When a leaf splits, the dividing key is <em>copied</em> into the parent. The leaves still hold every actual key, the parent just learns a new routing label. Real data isn't moved out of the leaf level.</p>
+<pre>before:  [13|15|16|18|24]   (overflow)
+
+after:   parent gains "18"
+         [13|15|16] [18|24]   (18 still in the right leaf)</pre>
+            </div>
+            <div class="concept">
+              <span class="concept__label">Index: push up</span>
+              <h4>The key leaves the node</h4>
+              <p>When an <em>index</em> node splits, its middle routing label is <em>pushed</em> up to the next level. Routing labels appear once and only once in the index, so the middle one moves rather than copies.</p>
+<pre>before:  [10|20|30|40|50]   (overflow)
+
+after:   parent gains "30"
+         [10|20] [40|50]   (30 has moved up, gone from here)</pre>
+            </div>
+          </div>
+
+          <p>Now the practice. In Part 1 you'll take a relation with three FDs and decompose it into BCNF, walking the same recipe two times in a row. In Part 2 you'll insert 16 keys one by one and watch the tree grow upward as splits happen.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
            1. NORMAL FORMS
            ============================================ -->
-      <section id="nf" class="lab-section lab-section--alt">
+      <section id="nf" class="lab-section">
         <h2 class="section-title">1. Normal Forms</h2>
         <div class="section-body">
 
@@ -234,7 +365,7 @@ C  → A</code></pre>
       <!-- ============================================
            2. B+ TREE
            ============================================ -->
-      <section id="bptree" class="lab-section">
+      <section id="bptree" class="lab-section lab-section--alt">
         <h2 class="section-title">2. B+ Trees</h2>
         <div class="section-body">
 
@@ -386,7 +517,7 @@ Final tree:
       <!-- ============================================
            COMMON MISTAKES
            ============================================ -->
-      <section id="troubleshooting" class="lab-section lab-section--alt">
+      <section id="troubleshooting" class="lab-section">
         <h2 class="section-title">Common mistakes</h2>
         <div class="section-body">
 
