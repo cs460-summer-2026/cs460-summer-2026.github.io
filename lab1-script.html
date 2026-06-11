@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lab 1 Speaking Script — CS460 Summer 2026</title>
+<style>
+  @page { size: Letter; margin: 0.7in 0.8in; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11.5pt;
+    line-height: 1.55;
+    color: #1a1a1a;
+    max-width: 7in;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 22pt;
+    margin: 0 0 4pt;
+    color: #5C2E2A;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    color: #555;
+    font-size: 11pt;
+    margin: 0 0 24pt;
+    font-style: italic;
+  }
+  h2 {
+    color: #E63E23;
+    font-size: 15pt;
+    margin: 26pt 0 6pt;
+    padding-bottom: 4pt;
+    border-bottom: 1.5px solid #D9D4CC;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 11.5pt;
+    margin: 14pt 0 4pt;
+    color: #3D1F1C;
+    page-break-after: avoid;
+  }
+  ul, ol { padding-left: 22pt; margin: 4pt 0 10pt; }
+  li { margin-bottom: 3pt; }
+  p { margin: 4pt 0 10pt; }
+  code, .mono {
+    font-family: "Menlo", "Consolas", monospace;
+    font-size: 10pt;
+    background: #EEEAE3;
+    padding: 1pt 4pt;
+    border-radius: 2pt;
+  }
+  .callout {
+    border-left: 3px solid #E63E23;
+    background: #FAF7F2;
+    padding: 8pt 12pt;
+    margin: 8pt 0 12pt;
+    font-size: 10.5pt;
+  }
+  .callout strong { color: #5C2E2A; }
+  .timing {
+    display: inline-block;
+    background: #EEEAE3;
+    color: #555;
+    font-size: 9pt;
+    padding: 1pt 8pt;
+    border-radius: 10pt;
+    margin-left: 8pt;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    vertical-align: middle;
+  }
+  .key {
+    background: #FFF7E0;
+    padding: 1pt 4pt;
+    border-radius: 2pt;
+  }
+  .pause {
+    color: #888;
+    font-style: italic;
+    font-size: 10pt;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid #D9D4CC;
+    margin: 14pt 0;
+  }
+  .footer-note {
+    margin-top: 30pt;
+    padding-top: 12pt;
+    border-top: 1px solid #D9D4CC;
+    color: #555;
+    font-size: 10pt;
+  }
+  /* keep sections from breaking awkwardly */
+  section { page-break-inside: auto; }
+</style>
+</head>
+<body>
+
+<h1>Lab 1 Speaking Script</h1>
+<p class="subtitle">CS460 Summer 2026 — ER Model &amp; Relational Algebra · A reference, not a script to read word-for-word</p>
+
+<div class="callout">
+  <strong>Before you start:</strong> open the lab page, have RelaX (<span class="mono">dbis-uibk.github.io/relax</span>) ready in another tab with the dataset already pasted. Take one breath. The students are here to learn, not to judge.
+</div>
+
+<!-- ============================================ -->
+<h2>Opening <span class="timing">~1 min</span></h2>
+<ul>
+  <li>Welcome to Lab 1. Today we cover two foundational topics: the <span class="key">ER model</span> and <span class="key">relational algebra</span>. Both show up in every database design conversation and every query you will ever write.</li>
+  <li>Plan for today: quick reference on ER, a modeling exercise, translating the model into SQL, then a parallel walkthrough of RA — first on paper, then live in a browser tool called RelaX.</li>
+  <li>Everything we cover is on the lab page. Open <span class="mono">cs460-summer-2026.github.io/lab-1.html</span>. The table of contents on the left mirrors what we'll do.</li>
+</ul>
+
+<!-- ============================================ -->
+<h2>Section 1 — ER Model Quick Reference <span class="timing">~3 min</span></h2>
+<ul>
+  <li>The ER model is how we sketch a database before we ever write SQL. Six shapes, that's it.</li>
+  <li>Walk through the table:
+    <ul>
+      <li><strong>Rectangle</strong> = entity (a thing — Song, User).</li>
+      <li><strong>Ellipse</strong> = attribute. Underline it if it's the key.</li>
+      <li><strong>Diamond</strong> = relationship between entities.</li>
+      <li><strong>Double rectangle</strong> = weak entity, can't exist alone.</li>
+      <li><strong>Bold line</strong> = total participation (must be in the relationship). Single line = partial.</li>
+    </ul>
+  </li>
+  <li>Point to the first SVG diagram: <em>Artist records Song</em>. Two rectangles, a diamond in between, attributes hanging off each side. That's literally all an ER diagram is.</li>
+  <li>Second diagram: cardinality. Arrow points to the "one" side. No arrow = "many". Memorize this.</li>
+  <li><strong>Primary key</strong>: minimal set of attributes that uniquely identifies a row.</li>
+  <li><strong>Foreign key</strong>: a column that points to another table's primary key.</li>
+</ul>
+<p class="pause">Pause. Ask: "Any questions on the shapes before we use them?"</p>
+
+<!-- ============================================ -->
+<h2>Section 2 — ER Exercise: BU Music Streaming <span class="timing">~5 min</span></h2>
+<ul>
+  <li>Now we model a real scenario: a music streaming service.</li>
+  <li>Four entities — read them off the page: Songs, Artists, Users, Playlists.</li>
+  <li><strong>Playlists is the weak entity.</strong> Why? Because <span class="mono">playlist_id</span> alone is not unique. Two different users can both have a playlist with id 1. You need the owner's <span class="mono">user_id</span> to identify it. So its key is <span class="mono">(user_id, playlist_id)</span>.</li>
+  <li>Walk the four relationships:
+    <ol>
+      <li><strong>Records</strong> — Artist ↔ Song, many-to-many. Why many-to-many? Songs have features; artists release many songs.</li>
+      <li><strong>Listens</strong> — User ↔ Song. Many-to-many. Same listener can replay the same song.</li>
+      <li><strong>Owns</strong> — User → Playlist. One-to-many. <em>Total participation on Playlist side</em>: every playlist must have an owner.</li>
+      <li><strong>Contains</strong> — Playlist ↔ Song. Many-to-many.</li>
+    </ol>
+  </li>
+  <li>Read the three discussion questions out loud. Don't answer them — let the room sit with them for a moment. If someone volunteers, great. If not, give your take after ~10 seconds:
+    <ul>
+      <li>Listens — partial. Some users may never play anything yet still have an account.</li>
+      <li>Owner deleted → playlists should be deleted (we'll see this in Rule 4).</li>
+      <li>Record Label could absolutely be its own entity, with a "signed to" relationship. Adds a new dimension to the model.</li>
+    </ul>
+  </li>
+</ul>
+
+<!-- ============================================ -->
+<h2>Section 3 — ER to Schema Translation <span class="timing">~6 min</span></h2>
+<ul>
+  <li>Now we go from a picture to runnable SQL. Four rules.</li>
+
+  <li><strong>Rule 1 — Strong entity becomes a table.</strong> Show the Songs CREATE TABLE. Every attribute is a column, key becomes PRIMARY KEY. That's it.</li>
+
+  <li><strong>Rule 2 — Many-to-many becomes a bridge table.</strong>
+    <ul>
+      <li>This is the one students always get wrong.</li>
+      <li><span class="key">Key insight</span>: you cannot store all songs by one artist as multiple columns inside that artist's row. Tables don't have variable widths.</li>
+      <li>So make a third table that stores the pairs. Show <span class="mono">Records</span>.</li>
+      <li>Primary key is <span class="mono">(artist_id, song_id)</span> together. Why both? Because if it were just <span class="mono">song_id</span>, each song could only have one artist. We want features (multiple artists per song).</li>
+      <li>Relationship attributes like <span class="mono">recording_date</span> live in this bridge table — they only make sense when you know both sides.</li>
+    </ul>
+  </li>
+
+  <li><strong>Rule 3 — Many-to-one becomes a foreign key column.</strong> No new table, just add a column on the many side. E.g., <span class="mono">album_id</span> in Songs.</li>
+
+  <li><strong>Rule 4 — Total participation becomes NOT NULL.</strong> Mark the foreign key NOT NULL so every row must reference an owner. Database enforces it for you.</li>
+</ul>
+
+<!-- ============================================ -->
+<h2>Section 4 — Relational Algebra Reference <span class="timing">~4 min</span></h2>
+<ul>
+  <li>Switch gears. Relational algebra is the math behind SQL. Every SQL query you write corresponds to an RA expression.</li>
+  <li>Why care? Because RA forces you to think about <em>what</em> you're computing, not <em>how</em>. Query optimizers do exactly this.</li>
+  <li>Walk the basic operators — point at the table, don't read it line by line:
+    <ul>
+      <li><strong>Selection σ</strong> = WHERE. Filter rows.</li>
+      <li><strong>Projection π</strong> = SELECT DISTINCT. Pick columns, kill duplicates.</li>
+      <li><strong>Cross product ×</strong> = every row of R paired with every row of S. Huge result.</li>
+      <li><strong>Set difference −</strong> = EXCEPT.</li>
+      <li><strong>Union ∪</strong> = UNION.</li>
+    </ul>
+  </li>
+  <li>Compound operators are shortcuts built from the basic five:
+    <ul>
+      <li><strong>Natural join ⋈</strong> = cross product, then select on shared attributes. The everyday workhorse.</li>
+      <li><strong>Intersection ∩</strong>, <strong>theta-join</strong>, <strong>division</strong>, <strong>rename ρ</strong>.</li>
+    </ul>
+  </li>
+  <li>Two facts to remember:
+    <ol>
+      <li>Selection never creates duplicates (it just removes rows).</li>
+      <li>Real SQL engines use bags by default — duplicates survive unless you use <span class="mono">DISTINCT</span>.</li>
+    </ol>
+  </li>
+</ul>
+
+<!-- ============================================ -->
+<h2>Section 5 — RA Examples (on paper) <span class="timing">~10 min</span></h2>
+<ul>
+  <li>Two tables: <strong>SONGS</strong> (15 rows, three albums) and <strong>FEATURES</strong> (6 rows of featured artists). Iceman, Habibti, Maid of Honour.</li>
+  <li>We're going to walk through 7 questions. Read the question, write the RA expression on the board (or talk through it), then click "Answer" to confirm.</li>
+
+  <li><strong>Q1.</strong> Iceman tracks → simple selection then projection. <span class="mono">π title (σ album = 'Iceman' (SONGS))</span>. Five songs.</li>
+  <li><strong>Q2.</strong> RnB songs → same shape, different filter. Reinforce the pattern.</li>
+  <li><strong>Q3.</strong> Songs with a featured artist → first join (natural join SONGS ⋈ FEATURES). Watch the row count drop from 15 to 5.</li>
+  <li><strong>Q4.</strong> Song Central Cee is on → filter Features first, then join. Show that filtering early is good practice.</li>
+  <li><strong>Q5.</strong> Features on Iceman OR Habibti → first <span class="key">union</span> query. Two joins, then ∪.</li>
+  <li><strong>Q6.</strong> Features on Habibti AND Maid of Honour → <span class="key">intersection</span>. Same shape as Q5 but with ∩. Answer is just Sexyy Red.</li>
+  <li><strong>Q7.</strong> Songs with no featured artist → <span class="key">set difference</span>. All song titles minus titles that appear in the join.</li>
+  <li>Spend 1 minute on each. If pace is good, ask for student attempts before revealing the answer.</li>
+</ul>
+<p class="pause">After Q7, breath. Ask: "Anyone want to see one of these run live?"</p>
+
+<!-- ============================================ -->
+<h2>Section 6 — RelaX (live in the browser) <span class="timing">~12 min</span></h2>
+<ul>
+  <li>RelaX is a free in-browser RA engine. No install. <span class="mono">dbis-uibk.github.io/relax</span>.</li>
+  <li><strong>Setup</strong>: click the Copy button on the dataset block in the lab page. Paste into the RelaX "Group Editor". Hit "Use group". Tables show up.</li>
+
+  <li>Important RelaX quirks to flag up front:
+    <ul>
+      <li>Type only <em>one</em> expression at a time. Multiple stacked queries crash with a parse error.</li>
+      <li>Can't type σ or π? Use words: <span class="mono">sigma</span>, <span class="mono">pi</span>, <span class="mono">join</span>, <span class="mono">union</span>, <span class="mono">except</span>.</li>
+      <li>Set difference <span class="mono">−</span> doesn't work — use the word <span class="mono">except</span> instead. This is why the lab page uses "except" in this section.</li>
+    </ul>
+  </li>
+
+  <li>Walk through R1–R6, executing each one live:
+    <ol>
+      <li><strong>R1</strong>: <span class="mono">π title (σ album = 'Iceman' (Songs))</span> — verify it matches Q1.</li>
+      <li><strong>R2</strong>: <span class="mono">π genre (Songs)</span> — 15 rows go to 4. <span class="key">Projection eliminates duplicates.</span> This is the most important fact in this section.</li>
+      <li><strong>R3</strong>: build the Habibti-features query step by step. Run step 1, look at the result. Run step 2, look. Run step 3. This is what a query plan looks like.</li>
+      <li><strong>R4</strong>: <span class="mono">π title (Songs) except π title (Songs ⋈ Features)</span>. Songs with no features. Verify against Q7.</li>
+      <li><strong>R5</strong>: cross product vs natural join. <span class="mono">Songs × Features</span> gives 90 rows. <span class="mono">Songs ⋈ Features</span> gives 6. The 84 extras are nonsense pairings — Dust featuring Popcaan, etc.</li>
+      <li><strong>R6 — self join</strong>:
+        <ul>
+          <li>Step 1: <span class="mono">Features ⋈ Features</span> → just gives back Features. A no-op.</li>
+          <li>Step 2: rename both columns of one copy. No join, just renamed.</li>
+          <li>Step 3: rename only one column, then join. <em>This</em> is useful — pairs of artists on the same song. The pattern behind "find songs featuring two different artists."</li>
+        </ul>
+      </li>
+    </ol>
+  </li>
+
+  <li>Reinforce: in RelaX the keyword <span class="mono">except</span> is set difference, the symbol <span class="mono">−</span> does <em>not</em> work as set difference (it's reserved for arithmetic).</li>
+</ul>
+
+<!-- ============================================ -->
+<h2>Wrap-up <span class="timing">~2 min</span></h2>
+<ul>
+  <li>What we covered: ER shapes → ER modeling → ER to SQL → RA notation → RA in practice.</li>
+  <li>Three things to remember:
+    <ol>
+      <li>Many-to-many always becomes a bridge table. Always.</li>
+      <li>Projection eliminates duplicates in pure RA. SQL doesn't, unless you say DISTINCT.</li>
+      <li>Natural join requires matching column names. If two tables don't share columns, you need a bridge or a rename.</li>
+    </ol>
+  </li>
+  <li>For the assignment: redo Q1–Q7 in RelaX yourself. Try writing the bridge tables for Listens and Contains from Section 2. Submit a screenshot of any one RelaX query running.</li>
+  <li>Office hours: [your slot]. Questions, email, post on Piazza.</li>
+  <li>Thanks. See you next week.</li>
+</ul>
+
+<div class="callout">
+  <strong>If you get stuck mid-lab:</strong>
+  <ul>
+    <li>"Great question, let me come back to that" is a complete sentence. Move on.</li>
+    <li>If RelaX errors on a query: check that only one expression is in the editor.</li>
+    <li>If a join returns 0 rows: the shared column names probably don't match.</li>
+    <li>If you forget what σ does: it's WHERE.</li>
+  </ul>
+</div>
+
+<div class="footer-note">
+  This script is a reference — talk through the page, not the script. The lab page itself is the source of truth. You've got this.
+</div>
+
+</body>
+</html>

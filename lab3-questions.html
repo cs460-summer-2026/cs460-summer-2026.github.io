@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lab 3 TA Prep — Likely Student Questions — CS460 Summer 2026</title>
+<style>
+  @page { size: Letter; margin: 0.7in 0.8in; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #1a1a1a;
+    max-width: 7in;
+    margin: 0 auto;
+  }
+  h1 { font-size: 21pt; margin: 0 0 4pt; color: #5C2E2A; letter-spacing: -0.01em; }
+  .subtitle { color: #555; font-size: 10.5pt; margin: 0 0 20pt; font-style: italic; }
+  h2 {
+    color: #E63E23;
+    font-size: 14pt;
+    margin: 22pt 0 8pt;
+    padding-bottom: 3pt;
+    border-bottom: 1.5px solid #D9D4CC;
+    page-break-after: avoid;
+  }
+  .q {
+    font-weight: 700;
+    color: #3D1F1C;
+    margin: 12pt 0 2pt;
+    page-break-after: avoid;
+  }
+  .q::before { content: "Q  "; color: #E63E23; }
+  .a { margin: 0 0 4pt; }
+  .a::before { content: "A  "; color: #888; font-weight: 700; }
+  code, .mono {
+    font-family: "Menlo", "Consolas", monospace;
+    font-size: 9.5pt;
+    background: #EEEAE3;
+    padding: 1pt 4pt;
+    border-radius: 2pt;
+  }
+  .intro {
+    border-left: 3px solid #E63E23;
+    background: #FAF7F2;
+    padding: 10pt 14pt;
+    margin: 0 0 16pt;
+    font-size: 10.5pt;
+  }
+  .intro strong { color: #5C2E2A; }
+  .fast {
+    background: #EAF4EC;
+    border-left: 3px solid #2E7D43;
+    padding: 8pt 12pt;
+    margin: 6pt 0 14pt;
+    font-size: 10pt;
+  }
+  .fast strong { color: #2E7D43; }
+  ul { padding-left: 20pt; margin: 3pt 0 8pt; }
+  li { margin-bottom: 2pt; }
+  .footer-note {
+    margin-top: 26pt;
+    padding-top: 10pt;
+    border-top: 1px solid #D9D4CC;
+    color: #555;
+    font-size: 9.5pt;
+  }
+</style>
+</head>
+<body>
+
+<h1>Lab 3 — TA Prep Sheet</h1>
+<p class="subtitle">CS460 Summer 2026 · Run the VERSUS PA1 skeleton · Likely student questions and quick answers</p>
+
+<div class="intro">
+  <strong>How this lab runs:</strong> students self-serve from the lab page. Your opening line: <em>"Have a look at Lab 3 and follow the steps. Each step has a green 'Check it worked' box, don't move on until your output matches. If something goes wrong, the Troubleshooting section probably has it. Otherwise just ask. Once you can register and create a bracket in the browser, you're free to go."</em>
+</div>
+
+<div class="fast">
+  <strong>Three things to announce up front to the whole room (preempts most questions):</strong>
+  <ul>
+    <li><strong>Windows: use PowerShell, not the old Command Prompt.</strong> Some commands won't work in cmd.</li>
+    <li><strong>Mac: if you hit "port 5000 in use," it's AirPlay Receiver.</strong> Either turn it off (System Settings → General → AirDrop &amp; Handoff) or change the port in app.py to 5001.</li>
+    <li><strong>Apostrophe in your username will break registration.</strong> The skeleton SQL is teaching code, it doesn't handle quotes. Use a username without an apostrophe.</li>
+  </ul>
+</div>
+
+<!-- ============================================ -->
+<h2>Setup &amp; environment questions</h2>
+
+<p class="q">I unzipped <code>samplecode.zip</code> but <code>cd samplecode</code> and there's no app.py.</p>
+<p class="a">Windows extraction often creates a nested folder, <code>samplecode\samplecode\app.py</code>. Have them <code>dir</code> and cd one level deeper, or drag the inner folder up. Troubleshooting covers this.</p>
+
+<p class="q">I'm in the right folder but <code>python app.py</code> says "no such file."</p>
+<p class="a">They're not actually in the folder. Have them run <code>pwd</code> (Mac) or <code>Get-Location</code> (Windows) to confirm where they are, then <code>ls</code>/<code>dir</code> to confirm app.py is visible.</p>
+
+<p class="q">My venv prompt doesn't show <code>(cs460env)</code> after activating.</p>
+<p class="a">Three possibilities: (1) Windows: PowerShell execution policy blocked the script, see the execution policy fix. (2) They typed the activate command wrong, the Windows path uses backslashes <code>cs460env\Scripts\Activate.ps1</code>. (3) They're in a venv they made elsewhere, fine, just re-create or re-activate the right one.</p>
+
+<p class="q">PowerShell error: "running scripts is disabled on this system."</p>
+<p class="a">Standard PowerShell block. Run <code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code>, press Y. One-time, then activate works. This is the biggest Windows trap, expect it a lot.</p>
+
+<p class="q">"externally-managed-environment" when running pip.</p>
+<p class="a">Venv isn't active. Prompt must show <code>(cs460env)</code>. Activate again, then retry pip.</p>
+
+<p class="q">Do I need to use the venv from Lab 2 or make a new one?</p>
+<p class="a">Reuse Lab 2's if they can find it. Otherwise make a new one with <code>python3 -m venv ~/Desktop/cs460env</code>. Either works, the lab uses Desktop path to stay consistent with Lab 2.</p>
+
+<!-- ============================================ -->
+<h2>Schema &amp; database questions</h2>
+
+<p class="q">PowerShell complains: "The '&lt;' operator is reserved for future use."</p>
+<p class="a">PowerShell doesn't support &lt; for input redirection. Use <code>Get-Content schema.sql | mysql -u root -p</code> instead, or load schema.sql in Workbench (which works the same on any OS).</p>
+
+<p class="q">Loading schema.sql gives "Access denied."</p>
+<p class="a">Wrong root password. Retype it. If they're sure it's right, they may be confusing their MySQL root password with their Mac/Windows login password, those are different.</p>
+
+<p class="q">SHOW TABLES is empty after loading the schema.</p>
+<p class="a">They didn't run <code>USE versus;</code> first. The schema creates the database but you have to switch into it to see its tables. If <code>SHOW DATABASES;</code> doesn't list versus at all, the schema actually failed, scroll back through their terminal for the real error.</p>
+
+<p class="q">I already had a database called versus from somewhere else and now it's gone.</p>
+<p class="a">Yes, schema.sql starts with <code>DROP DATABASE IF EXISTS versus;</code>. That's intentional for fresh starts. Tell them to recreate whatever they had, or rename it next time.</p>
+
+<!-- ============================================ -->
+<h2>Running the app questions</h2>
+
+<p class="q">"ModuleNotFoundError: No module named 'flask'" (or 'mysql').</p>
+<p class="a">Venv isn't active, or they installed packages outside the venv. Activate the venv (prompt shows <code>(cs460env)</code>), reinstall <code>pip install -r requirements.txt</code>, then <code>python app.py</code>. All three from the same activated shell.</p>
+
+<p class="q">"mysql.connector.errors.ProgrammingError: 1045 Access denied for user 'root'."</p>
+<p class="a">Their <code>DB_PASSWORD</code> in app.py doesn't match their real MySQL root password. Open app.py, fix the password between the single quotes, save, re-run. Blank password is <code>DB_PASSWORD = ''</code> (two quotes, nothing between, no spaces).</p>
+
+<p class="q">"Unknown database 'versus'."</p>
+<p class="a">Schema didn't run. Go back to Step 3 and load it. Confirm with <code>SHOW DATABASES;</code> before retrying.</p>
+
+<p class="q">"Address already in use" on port 5000.</p>
+<p class="a">Either they have a stale Python process running, find that terminal and Ctrl+C, or change the last line of app.py to <code>app.run(port=5001, debug=True)</code> and use localhost:5001 in the browser. Mac specifically: this is almost always AirPlay Receiver, see the next question.</p>
+
+<p class="q">Mac: port 5000 is "AirPlay Receiver."</p>
+<p class="a">macOS Monterey and newer reserved port 5000 for AirPlay. Two options: (1) System Settings → General → AirDrop &amp; Handoff → turn AirPlay Receiver off. (2) Change Flask to a different port in app.py. Option 1 is cleaner because the lab and the rest of the project assume port 5000.</p>
+
+<p class="q">"jinja2.exceptions.TemplateNotFound: hello.html"</p>
+<p class="a">Running app.py from the wrong directory. The <code>templates/</code> folder has to sit next to app.py in their current shell. Have them <code>pwd</code>/<code>Get-Location</code>, then <code>cd</code> back into the skeleton folder.</p>
+
+<p class="q">The terminal returns to my prompt after running <code>python app.py</code>.</p>
+<p class="a">The server crashed. Scroll up in the terminal for the actual error. It's almost always one of: wrong DB_PASSWORD (1045), wrong database name (Unknown database), or port in use. The traceback names the cause.</p>
+
+<!-- ============================================ -->
+<h2>Browser &amp; usage questions</h2>
+
+<p class="q">Browser says "This site can't be reached."</p>
+<p class="a">Three checks: (1) <code>python app.py</code> still running in their terminal? (2) Did they type <code>http://</code> not <code>https://</code>? (3) Did they change the port to 5001 but go to 5000? Most "can't be reached" is one of those three.</p>
+
+<p class="q">Register fails with "You have an error in your SQL syntax."</p>
+<p class="a">They used an apostrophe in username or password (e.g. O'Brien). The skeleton uses naive string interpolation in SQL, single quotes break it. Tell them this is a known limitation of the teaching code and to use a name without an apostrophe. We fix this with parameterized queries later in the course.</p>
+
+<p class="q">Create-bracket form won't submit, no error.</p>
+<p class="a">They changed the entrant count dropdown after partially filling in the form, so some seed fields are empty but still <code>required</code>. The browser silently blocks submission. Tell them to scroll the form and fill every Seed line.</p>
+
+<p class="q">My bracket has 7 matchups but only 4 show entrant names, the rest say (TBD).</p>
+<p class="a">That's correct. Round 1 has all 4 matchups filled in (8 entrants paired). Rounds 2 and 3 are empty shells waiting to be filled in by the close_round stored procedure they'll build for PA1. Not a bug, expected output.</p>
+
+<p class="q">I changed app.py but my edit isn't showing in the browser.</p>
+<p class="a">Debug mode usually auto-reloads, but big edits sometimes don't. Ctrl+C the server, run <code>python app.py</code> again, reload the browser. (Also: did they save the file? Common miss.)</p>
+
+<!-- ============================================ -->
+<h2>Higher-level questions you might get</h2>
+
+<p class="q">Why does the SQL use string formatting like <code>"...'{0}'".format(x)</code>? Isn't that bad?</p>
+<p class="a">Yes, it's SQL injection vulnerable, and it's intentional for teaching simplicity. The README acknowledges this. We'll cover parameterized queries (<code>cursor.execute(sql, params)</code>) in a later lab. For PA1 they can keep this style, or switch to parameterized if they're comfortable.</p>
+
+<p class="q">Why is the DB connection a single global variable?</p>
+<p class="a">Same reason, teaching simplicity. A real Flask app uses a connection pool or per-request connections. For their PA1 the single global is fine, it just means if MySQL restarts mid-session the app needs a restart too.</p>
+
+<p class="q">Do I need to commit the venv folder?</p>
+<p class="a">No, never. Venv folders are huge and machine-specific. Add it to <code>.gitignore</code> if they're using git. Same for any IDE folders like <code>.vscode</code> or <code>.idea</code>.</p>
+
+<p class="q">Am I done with Lab 3?</p>
+<p class="a">Point them at the "You're done when…" checklist. Four items: SHOW TABLES lists four tables, python app.py runs without errors, register works, 8-entrant bracket creates and displays 7 matchups. Once all four are true, lab is over.</p>
+
+<div class="footer-note">
+  If a student is genuinely stuck for more than 5 minutes on something not in the page's Troubleshooting, the likely culprits in order: (1) venv not actually active, prompt missing the prefix, (2) wrong directory, (3) wrong password in app.py, (4) Workbench connected but they're running the script connected to a different MySQL. Pair-up stuck students with the ones who finished.
+</div>
+
+</body>
+</html>
