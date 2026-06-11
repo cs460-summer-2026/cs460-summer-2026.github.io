@@ -675,6 +675,19 @@ pre[class*="language-"] {
   overflow-x: auto;
 }
 
+/* SVG diagram figures inside lab content */
+.section-body figure.diagram {
+  margin: var(--space-3) 0 var(--space-4);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-cream);
+}
+.section-body figure.diagram img {
+  display: block;
+  width: 100%;
+}
+
 /* Concept cards: a small grid of "the picture / the rule" panels for intuition sections */
 .section-body .concept-grid {
   display: grid;

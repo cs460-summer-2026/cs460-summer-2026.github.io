@@ -280,18 +280,13 @@ C  &rarr; A</code></pre>
 
           <h3>Structure</h3>
 
-          <p>A B+ tree has two kinds of nodes. <strong>Internal nodes</strong> are routers: they hold keys that act as dividers, telling you which child to follow. <strong>Leaf nodes</strong> hold the actual data keys (and in a real database, pointers to the rows).</p>
+          <p>A B+ tree has two kinds of nodes. <strong>Internal nodes</strong> are routers: they hold keys that act as dividers, telling you which child to follow. <strong>Leaf nodes</strong> hold the actual data keys (and in a real database, pointers to the rows). Leaves are also linked left-to-right so range scans are fast.</p>
 
-<pre class="state">Internal node: routes the search
-                    [ 31 | 54 ]
-                   /     |     \
-        go here       go here     go here
-        if &lt; 31    if 31..53   if &ge; 54
+          <figure class="diagram">
+            <img src="img/bptree_structure.svg" alt="B+ tree structure: one internal node with keys 31, 54, 78 routing down to four leaf nodes. Leaves are linked in order." style="width:100%;max-width:620px;display:block;">
+          </figure>
 
-Leaf nodes: hold the real keys
-  [ 16 | 24 ]    [ 31 | 49 ]    [ 54 | 76 | 85 ]</pre>
-
-          <p>To search for 49: at the root, 49 is between 31 and 54, so go middle. At the leaf, 49 is there. Two disk reads total.</p>
+          <p>To search for 49: the root key 31 &le; 49 &lt; 54, so follow the middle pointer. The leaf [31 | 49] contains 49. Done in two disk reads regardless of how many rows the table has.</p>
 
           <h3>The order constraint</h3>
 
@@ -303,30 +298,21 @@ Leaf nodes: hold the real keys
 
           <h3>Leaf split: copy up</h3>
 
-          <p>When a leaf overflows, split it evenly. The middle key (the first key of the right half) is <strong>copied</strong> into the parent as a new routing key. It stays in the leaf too, because leaves must hold every actual key.</p>
+          <p>When a leaf overflows, split it in half. The first key of the right half is <strong>copied</strong> into the parent as a new routing key. It stays in the leaf too, because leaves must hold every actual data key.</p>
 
-<pre class="state">Leaf [ 13 | 15 | 16 | 18 | 24 ] overflows (5 keys, d=2)
-
-Split point: first key of right half = 18
-
-Left leaf:   [ 13 | 15 | 16 ]
-Right leaf:  [ 18 | 24 ]         &larr; 18 stays here
-
-Parent gains the routing key 18 (copied up, not removed from leaf)</pre>
+          <figure class="diagram">
+            <img src="img/bptree_leaf_split.svg" alt="Leaf split diagram: a 5-key leaf [13|15|16|18|24] splits into [13|15|16] and [18|24]. The key 18 is copied up to the parent, and 18 also stays in the right leaf." style="width:100%;max-width:620px;display:block;">
+          </figure>
 
           <h3>Internal node split: push up</h3>
 
-          <p>If adding a routing key to an internal node causes it to overflow, that node splits too. The middle key of the internal node is <strong>pushed</strong> up to the parent. Unlike a leaf split, the middle key leaves the node entirely, it does not stay in either child.</p>
+          <p>If a routing key propagates up to an internal node that is already full, that node splits too. The middle key is <strong>pushed</strong> up to the parent and does not remain in either child. This is the key difference from a leaf split.</p>
 
-<pre class="state">Internal node [ 10 | 20 | 30 | 40 | 50 ] overflows (5 keys)
+          <figure class="diagram">
+            <img src="img/bptree_index_split.svg" alt="Internal node split diagram: a 5-key internal node [10|20|30|40|50] splits. The middle key 30 is pushed up to the grandparent. Left child gets [10|20], right child gets [40|50]. 30 is gone from both children." style="width:100%;max-width:620px;display:block;">
+          </figure>
 
-Middle key: 30
-
-Left child:  [ 10 | 20 ]
-Right child: [ 40 | 50 ]     &larr; 30 is NOT here
-Parent gains 30 (pushed up, removed from this node)</pre>
-
-          <p>If the root splits, a new root is created one level above it and the tree grows taller.</p>
+          <p>If the root itself splits, a brand-new root is created one level above it and the tree grows taller.</p>
 
         </div>
       </section>
