@@ -71,11 +71,11 @@
     <aside class="toc" aria-label="Table of contents">
       <p class="toc__label">On this page</p>
       <ul class="toc__list">
-        <li><a href="#reference">Quick reference</a></li>
-        <li><a href="#concepts">The ideas, intuitively</a></li>
-        <li><a href="#nf">1. Normal Forms</a></li>
-        <li><a href="#bptree">2. B+ Trees</a></li>
-        <li><a href="#troubleshooting">Common mistakes</a></li>
+        <li><a href="#nf-theory">1. Normal Forms</a></li>
+        <li><a href="#nf-exercise">&#8627; Exercise</a></li>
+        <li><a href="#bptree-theory">2. B+ Trees</a></li>
+        <li><a href="#bptree-exercise">&#8627; Exercise</a></li>
+        <li><a href="#mistakes">Common mistakes</a></li>
       </ul>
     </aside>
 
@@ -84,307 +84,276 @@
       <details class="toc-mobile">
         <summary>On this page ▾</summary>
         <ul>
-          <li><a href="#reference">Quick reference</a></li>
-          <li><a href="#concepts">The ideas, intuitively</a></li>
-          <li><a href="#nf">1. Normal Forms</a></li>
-          <li><a href="#bptree">2. B+ Trees</a></li>
-          <li><a href="#troubleshooting">Common mistakes</a></li>
+          <li><a href="#nf-theory">1. Normal Forms</a></li>
+          <li><a href="#nf-exercise">Exercise</a></li>
+          <li><a href="#bptree-theory">2. B+ Trees</a></li>
+          <li><a href="#bptree-exercise">Exercise</a></li>
+          <li><a href="#mistakes">Common mistakes</a></li>
         </ul>
       </details>
 
       <aside class="callout">
         <span class="callout__label">Read this first</span>
-        <p>Today is practice. Theory is in the lecture slides, today you actually run the algorithms by hand. Two short walkthroughs (one BCNF decomposition, one B+ tree of 16 keys), each with steps you try yourself before clicking to reveal the answer.</p>
-        <p>Multiple correct answers exist in both parts. If your decomposition or your tree differs from the reveal but follows the rules, you're probably right. The <a href="#troubleshooting">Common mistakes</a> section at the bottom explains when "different" actually means "wrong".</p>
+        <p>Each topic has a short theory section followed by a hands-on exercise. Read the theory, then try the exercise steps before clicking to reveal the answer. Multiple correct answers exist in both parts. The <a href="#mistakes">Common mistakes</a> section at the bottom explains when "different" actually means "wrong".</p>
       </aside>
 
       <!-- ============================================
-           QUICK REFERENCE
+           1. NORMAL FORMS - THEORY
            ============================================ -->
-      <section id="reference" class="lab-section">
-        <h2 class="section-title">Quick reference</h2>
-        <div class="section-body">
-
-          <h3>Functional dependencies</h3>
-          <ul>
-            <li><code class="inline">X → Y</code> means: any two rows that agree on X also agree on Y.</li>
-            <li><strong>Attribute closure</strong> <code class="inline">X⁺</code>: start with X, then keep adding right-hand sides of any FD whose left-hand side is already in <code class="inline">X⁺</code>.</li>
-            <li>X is a <strong>superkey</strong> if <code class="inline">X⁺</code> contains every attribute of R.</li>
-            <li>X is a <strong>candidate key</strong> if it's a superkey and no proper subset of X is a superkey.</li>
-          </ul>
-
-          <h3>BCNF</h3>
-          <p>R is in BCNF if for every non-trivial FD <code class="inline">X → Y</code>, X is a superkey.</p>
-          <p>If some FD violates this, decompose: replace R with <code class="inline">R - Y</code> and <code class="inline">XY</code>.</p>
-
-          <h3>B+ tree</h3>
-          <p>Every node holds between <em>d</em> and <em>2d</em> keys. In this lab <strong>d = 2</strong>, so every node holds between <strong>2 and 4 keys</strong>. Root may hold fewer.</p>
-          <ul>
-            <li><strong>Insert</strong>: find the leaf, put the key in. If the leaf now has 5 keys, split it.</li>
-            <li><strong>Leaf split</strong>: half the keys stay, half move to a new leaf. The smallest key of the new leaf is <strong>copied up</strong> to the parent.</li>
-            <li><strong>Index node split</strong>: the middle key is <strong>pushed up</strong> to the parent (not copied).</li>
-            <li>If the root splits, the tree grows one level taller.</li>
-          </ul>
-
-        </div>
-      </section>
-
-      <!-- ============================================
-           CONCEPTS / INTUITION
-           ============================================ -->
-      <section id="concepts" class="lab-section lab-section--alt">
-        <h2 class="section-title">The ideas, intuitively</h2>
-        <div class="section-body">
-
-          <p>Both halves of today's lab look like notation games until you see what the notation is protecting you from. A few pictures before the practice.</p>
-
-          <h3>Part 1: why we decompose tables</h3>
-
-          <p>Imagine a single table that records, for every CS460 student, their name, their major, and their advisor:</p>
-
-<pre class="state">Students (name, major, advisor)
-
-  Alice     CS    Prof. Kim
-  Bob       CS    Prof. Kim
-  Carla     CS    Prof. Kim
-  Dan       Math  Prof. Ng
-  Eve       Math  Prof. Ng</pre>
-
-          <p>Prof. Kim's name is written down three times. That's the same fact, stored three times. Now suppose Prof. Kim leaves and a new CS advisor is appointed. You'd better remember to update <em>all three</em> rows. Miss one and your table now claims CS has two advisors at the same time.</p>
-
-          <p>This is the disease normal forms cure. The redundancy isn't ugly, it's <em>dangerous</em>: it lets the database contradict itself.</p>
-
-          <div class="concept-grid">
-            <div class="concept">
-              <span class="concept__label">The arrow</span>
-              <h4>FD: X → Y</h4>
-              <p>"Knowing X is enough to know Y." In the table above, <code class="inline">major → advisor</code>: tell me the major, I'll tell you the advisor. No need to look at the name.</p>
-            </div>
-            <div class="concept">
-              <span class="concept__label">The key</span>
-              <h4>What identifies a row?</h4>
-              <p>A <strong>candidate key</strong> is a minimal set of columns that pins down every other column. In the table above the candidate key is just <code class="inline">name</code>, because each name is unique.</p>
-            </div>
-            <div class="concept">
-              <span class="concept__label">The rule</span>
-              <h4>BCNF in one line</h4>
-              <p>"The only way to have an arrow is to start from a key." Every FD <code class="inline">X → Y</code> in the table must have X as a superkey. <code class="inline">major → advisor</code> breaks this, because <code class="inline">major</code> is not a key.</p>
-            </div>
-            <div class="concept">
-              <span class="concept__label">The fix</span>
-              <h4>Split out the arrow</h4>
-              <p>Move the offending FD into its own little table. We end up with <code class="inline">(name, major)</code> and <code class="inline">(major, advisor)</code>. Now Prof. Kim's name lives in <em>one</em> place.</p>
-            </div>
-          </div>
-
-          <p>After the split:</p>
-
-<pre class="state">Students (name, major)        Advisors (major, advisor)
-
-  Alice  CS                     CS    Prof. Kim
-  Bob    CS                     Math  Prof. Ng
-  Carla  CS
-  Dan    Math
-  Eve    Math</pre>
-
-          <p>Prof. Kim's name appears once. To change CS's advisor you update one row. To reconstruct the original table, join on <code class="inline">major</code>. <strong>The mechanical recipe you'll practice is just: find an arrow whose left side isn't a key, split the table along that arrow, repeat until no bad arrows remain.</strong></p>
-
-          <h3>Part 2: why B+ trees, and what a "node" really is</h3>
-
-          <p>A database table sits on disk. Disk is slow. Every time you touch the disk you wait roughly ten million times longer than a CPU operation. So when you ask "find the student with ID 31415," the database does not scan every row. It walks a B+ tree.</p>
-
-          <p>A B+ tree is best understood as a <strong>signpost system</strong>. You start at the top and at every level the signpost tells you which way to go. You go that way. After two or three signposts you've arrived. Every disk read along the way is a node.</p>
-
-          <div class="concept-grid">
-            <div class="concept">
-              <span class="concept__label">The shape</span>
-              <h4>Wide, not tall</h4>
-              <p>Each node holds many keys (in our lab, up to 4). Branching factor stays high, so the tree only needs a handful of levels even for millions of rows. A height-3 tree with 100 keys per node can index a million rows.</p>
-            </div>
-            <div class="concept">
-              <span class="concept__label">The signpost</span>
-              <h4>Index nodes are routers</h4>
-              <p>An index node says "smaller than 31, go left; between 31 and 54, go middle; bigger than 54, go right." The numbers in the index are routing labels, not data.</p>
-            </div>
-            <div class="concept">
-              <span class="concept__label">The data</span>
-              <h4>Leaves hold the real keys</h4>
-              <p>The bottom row of the tree, the <em>leaves</em>, is where every key actually lives. The index above is built only to help you find the right leaf fast.</p>
-            </div>
-            <div class="concept">
-              <span class="concept__label">The trick</span>
-              <h4>Always balanced</h4>
-              <p>By forcing every node to hold between <em>d</em> and <em>2d</em> keys, the tree can never go lopsided. Whichever leaf you're searching for is the same distance from the root.</p>
-            </div>
-          </div>
-
-          <p>A picture. Two index levels routing you to the right leaf:</p>
-
-<pre class="state">                  [ 31 | 54 ]
-                  /    |     \
-                 /     |      \
-        [ 16 | 24 ]  [31|49]  [54|76|85]
-        leaves  (every actual key lives here)</pre>
-
-          <p>To look up 49: at the root, 49 is between 31 and 54, so go middle. At the leaf, 49 is right there. <strong>Two disk reads to find one row out of millions.</strong> That's the whole point of the tree.</p>
-
-          <h3>Insertion: why splits happen</h3>
-
-          <p>A node has a maximum capacity (4 keys in this lab). Insert a key into a leaf that's already full and you have 5 keys, one too many. The leaf <strong>splits in half</strong> and the new neighbour leaf needs to be findable from above, so its smallest key is added to the parent index node as a new signpost.</p>
-
-          <div class="concept-grid">
-            <div class="concept">
-              <span class="concept__label">Leaves: copy up</span>
-              <h4>The key stays in the leaf</h4>
-              <p>When a leaf splits, the dividing key is <em>copied</em> into the parent. The leaves still hold every actual key, the parent just learns a new routing label. Real data isn't moved out of the leaf level.</p>
-<pre>before:  [13|15|16|18|24]   (overflow)
-
-after:   parent gains "18"
-         [13|15|16] [18|24]   (18 still in the right leaf)</pre>
-            </div>
-            <div class="concept">
-              <span class="concept__label">Index: push up</span>
-              <h4>The key leaves the node</h4>
-              <p>When an <em>index</em> node splits, its middle routing label is <em>pushed</em> up to the next level. Routing labels appear once and only once in the index, so the middle one moves rather than copies.</p>
-<pre>before:  [10|20|30|40|50]   (overflow)
-
-after:   parent gains "30"
-         [10|20] [40|50]   (30 has moved up, gone from here)</pre>
-            </div>
-          </div>
-
-          <p>Now the practice. In Part 1 you'll take a relation with three FDs and decompose it into BCNF, walking the same recipe two times in a row. In Part 2 you'll insert 16 keys one by one and watch the tree grow upward as splits happen.</p>
-
-        </div>
-      </section>
-
-      <!-- ============================================
-           1. NORMAL FORMS
-           ============================================ -->
-      <section id="nf" class="lab-section">
+      <section id="nf-theory" class="lab-section">
         <h2 class="section-title">1. Normal Forms</h2>
         <div class="section-body">
 
-          <p>Given a relation <code class="inline">R = (A, B, C, D)</code> and the following FDs:</p>
+          <h3>The problem: redundancy</h3>
 
-<pre><code class="language-none">AB → C
-B  → D
-C  → A</code></pre>
+          <p>Consider a table that stores every student alongside their department and the building that department is in:</p>
+
+<pre class="state">Enrollment(student, dept, building)
+
+  Alice   CS      Gates
+  Bob     CS      Gates
+  Carla   CS      Gates
+  Dan     Math    Green
+  Eve     Math    Green</pre>
+
+          <p>The fact "CS is in Gates" is stored three times. If CS moves buildings, you update three rows. Miss one, and the table now disagrees with itself. This kind of redundancy is what normal forms are designed to eliminate.</p>
+
+          <p>The root cause is an FD between non-key columns: <code class="inline">dept &rarr; building</code>. The department alone determines the building, no student needed. That's a hidden dependency that doesn't belong in this table.</p>
+
+          <h3>Functional dependencies</h3>
+
+          <p><code class="inline">X &rarr; Y</code> means: any two rows that have the same value for X must also have the same value for Y. Knowing X is enough to know Y.</p>
+
+          <p>The <strong>attribute closure</strong> of X, written <code class="inline">X&#x207A;</code>, is the full set of attributes you can determine starting from X. Algorithm: start with X, then repeatedly add the right-hand side of any FD whose left-hand side is already in your set.</p>
+
+<pre class="state">Example: FDs are  AB &rarr; C,  B &rarr; D,  C &rarr; A
+
+Compute (AB)&#x207A;:
+  start:       {A, B}
+  AB &rarr; C:    {A, B, C}
+  B  &rarr; D:    {A, B, C, D}    &larr; all attributes, so AB is a superkey</pre>
+
+          <p>X is a <strong>superkey</strong> if <code class="inline">X&#x207A;</code> contains every attribute of the relation. X is a <strong>candidate key</strong> if it is a superkey and no proper subset of X is also a superkey.</p>
+
+          <h3>BCNF</h3>
+
+          <p>A relation is in Boyce-Codd Normal Form if, for every non-trivial FD <code class="inline">X &rarr; Y</code>, X is a superkey. In other words: the only columns that get to "determine" other columns are the keys.</p>
+
+          <p>In the Enrollment example, <code class="inline">dept &rarr; building</code> violates BCNF because <code class="inline">dept</code> is not a superkey. The fix is to <strong>decompose</strong>: pull the offending FD into its own table.</p>
+
+<pre class="state">Before (BCNF violation):
+  Enrollment(student, dept, building)
+
+After decomposition using  dept &rarr; building:
+  Enrollment(student, dept)          &larr; R minus {building}
+  DeptBuilding(dept, building)       &larr; just the FD</pre>
+
+          <p>Now each fact lives in exactly one place. The general recipe is:</p>
+
+          <ol>
+            <li>Find any FD <code class="inline">X &rarr; Y</code> where X is not a superkey.</li>
+            <li>Replace R with <code class="inline">R - Y</code> (all attributes except Y) and <code class="inline">XY</code> (just X and Y).</li>
+            <li>Repeat on each new relation until no violations remain.</li>
+          </ol>
+
+          <h3>Lossless joins</h3>
+
+          <p>A decomposition is lossless if you can reconstruct the original table by joining the pieces. A two-way split <code class="inline">R &rarr; R1, R2</code> is guaranteed lossless when the shared columns <code class="inline">R1 &cap; R2</code> form a key of R1 or R2. This is always true when you decompose using a violating FD: the shared column is the left-hand side of the FD, which is a key of the smaller table.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           1. NORMAL FORMS - EXERCISE
+           ============================================ -->
+      <section id="nf-exercise" class="lab-section lab-section--alt">
+        <h2 class="section-title">Exercise: decompose R into BCNF</h2>
+        <div class="section-body">
+
+          <p>Given the relation <code class="inline">R = (A, B, C, D)</code> and the FDs:</p>
+
+<pre><code class="language-none">AB &rarr; C
+B  &rarr; D
+C  &rarr; A</code></pre>
 
           <p>Decompose R into BCNF.</p>
 
-          <h3>Step 1. Find the candidate key</h3>
-          <p>Try each likely subset of attributes. Compute its closure. If the closure contains all of <code class="inline">ABCD</code>, it's a superkey. Minimal superkeys are candidate keys.</p>
+          <h3>Step 1. Find the candidate keys</h3>
+          <p>Try subsets of attributes. Compute each closure. A subset is a candidate key if its closure is all of ABCD and no smaller subset also reaches ABCD.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
-            <p class="query-card__question">What is <code class="inline">(AB)⁺</code>? Is AB a candidate key?</p>
+            <p class="query-card__question">What is <code class="inline">(AB)&#x207A;</code>? Is AB a candidate key? What about BC?</p>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
-                <p>Start with <code class="inline">{A, B}</code>. Apply <code class="inline">AB → C</code>, add C. Apply <code class="inline">B → D</code>, add D. Now <code class="inline">{A, B, C, D}</code>. So <code class="inline">(AB)⁺ = ABCD</code>, AB is a superkey.</p>
-                <p>Is it minimal? Check the singletons. <code class="inline">A⁺ = A</code> (no FD has just A on the left). <code class="inline">B⁺ = BD</code>. Neither is a superkey, so AB is a candidate key.</p>
-                <p>Also try <code class="inline">(BC)⁺</code>: start with B and C, get D from <code class="inline">B → D</code>, get A from <code class="inline">C → A</code>. So <code class="inline">(BC)⁺ = ABCD</code> and BC is also a candidate key.</p>
-                <p><strong>Candidate keys: AB and BC.</strong></p>
+                <p>Start with {A, B}. Apply <code class="inline">AB &rarr; C</code>, add C. Apply <code class="inline">B &rarr; D</code>, add D. <code class="inline">(AB)&#x207A; = ABCD</code>. AB is a superkey.</p>
+                <p>Is it minimal? <code class="inline">A&#x207A; = A</code>, <code class="inline">B&#x207A; = BD</code>. Neither singleton reaches all four attributes, so no proper subset of AB is a superkey. <strong>AB is a candidate key.</strong></p>
+                <p>Try BC: start with {B, C}. <code class="inline">B &rarr; D</code> adds D. <code class="inline">C &rarr; A</code> adds A. <code class="inline">(BC)&#x207A; = ABCD</code>. B alone gives BD, C alone gives AC, neither is a superkey. <strong>BC is also a candidate key.</strong></p>
               </div>
             </details>
           </div>
 
           <h3>Step 2. Find a BCNF violation</h3>
-          <p>For each FD, ask: is the left-hand side a superkey?</p>
+          <p>For each FD, ask whether the left-hand side is a superkey.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
-            <p class="query-card__question">Which of <code class="inline">AB → C</code>, <code class="inline">B → D</code>, <code class="inline">C → A</code> violate BCNF?</p>
+            <p class="query-card__question">Which of the three FDs violate BCNF?</p>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
                 <ul>
-                  <li><code class="inline">AB → C</code>: AB is a candidate key (so a superkey). OK.</li>
-                  <li><code class="inline">B → D</code>: <code class="inline">B⁺ = BD</code>, not a superkey. <strong>Violates BCNF.</strong></li>
-                  <li><code class="inline">C → A</code>: <code class="inline">C⁺ = AC</code>, not a superkey. <strong>Violates BCNF.</strong></li>
+                  <li><code class="inline">AB &rarr; C</code>: AB is a candidate key. No violation.</li>
+                  <li><code class="inline">B &rarr; D</code>: <code class="inline">B&#x207A; = BD</code>, not a superkey. <strong>Violates BCNF.</strong></li>
+                  <li><code class="inline">C &rarr; A</code>: <code class="inline">C&#x207A; = AC</code>, not a superkey. <strong>Violates BCNF.</strong></li>
                 </ul>
-                <p>Two violations. Pick one and decompose.</p>
+                <p>Two violations. Pick one to decompose on first.</p>
               </div>
             </details>
           </div>
 
-          <h3>Step 3. Decompose</h3>
-          <p>Take the violation <code class="inline">B → D</code>. Replace R with <code class="inline">R - {D}</code> and <code class="inline">BD</code>.</p>
+          <h3>Step 3. First decomposition</h3>
+          <p>Use the violation <code class="inline">B &rarr; D</code>. Split R into <code class="inline">R - {D}</code> and <code class="inline">BD</code>.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
-            <p class="query-card__question">Write the two new relations and the FDs that hold on each.</p>
+            <p class="query-card__question">Write the two new relations and the FDs on each. Which one is already in BCNF?</p>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
-                <p><strong>R1 = (A, B, C)</strong> with FDs from the original projected onto ABC: <code class="inline">AB → C</code> and <code class="inline">C → A</code>.</p>
-                <p><strong>R2 = (B, D)</strong> with FD <code class="inline">B → D</code>.</p>
-                <p>R2 is in BCNF (B is the key of R2 and the only FD has B on the left). R1 is not done yet, <code class="inline">C → A</code> still violates BCNF.</p>
+                <p><strong>R1 = (A, B, C)</strong> with FDs <code class="inline">AB &rarr; C</code> and <code class="inline">C &rarr; A</code>.</p>
+                <p><strong>R2 = (B, D)</strong> with FD <code class="inline">B &rarr; D</code>. B is the key of R2, so R2 is already in BCNF.</p>
+                <p>R1 still has <code class="inline">C &rarr; A</code> where C is not a superkey of R1. Not done yet.</p>
               </div>
             </details>
           </div>
 
-          <h3>Step 4. Handle the remaining violation</h3>
-          <p>In R1, <code class="inline">C → A</code> still violates BCNF. Decompose R1 the same way.</p>
+          <h3>Step 4. Second decomposition</h3>
+          <p>Now decompose R1 using <code class="inline">C &rarr; A</code>.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
-            <p class="query-card__question">Decompose R1 using <code class="inline">C → A</code>. What are the final relations?</p>
+            <p class="query-card__question">Split R1. Write the final set of relations.</p>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
                 <p>R1 = (A, B, C) splits into <strong>R1a = (B, C)</strong> and <strong>R1b = (A, C)</strong>.</p>
                 <p>Final BCNF decomposition: <strong>(A, C)</strong>, <strong>(B, C)</strong>, <strong>(B, D)</strong>.</p>
-                <p>Sanity check: each relation has its key on the left of every FD that holds inside it. Done.</p>
+                <p>In each relation, every non-trivial FD has a superkey on the left. Done.</p>
               </div>
             </details>
           </div>
 
-          <h3>Step 5. Is it lossless?</h3>
-          <p>A two-way split <code class="inline">R → X, Y</code> is lossless if <code class="inline">X ∩ Y</code> is a key of X or of Y.</p>
+          <h3>Step 5. Check lossless</h3>
+          <p>For each split, confirm that the shared columns form a key of one of the two pieces.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
-            <p class="query-card__question">Check each of the two splits we made.</p>
+            <p class="query-card__question">Check both splits.</p>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
-                <p>First split: R → (A, B, C) and (B, D). Intersection is <code class="inline">{B}</code>. B is the key of (B, D). Lossless.</p>
-                <p>Second split: (A, B, C) → (A, C) and (B, C). Intersection is <code class="inline">{C}</code>. C is the key of (A, C) (since <code class="inline">C → A</code>). Lossless.</p>
-                <p>Both splits lossless, so the whole decomposition is lossless.</p>
+                <p><strong>Split 1:</strong> R &rarr; (A,B,C) and (B,D). Shared: {B}. B is the key of (B,D). Lossless.</p>
+                <p><strong>Split 2:</strong> (A,B,C) &rarr; (A,C) and (B,C). Shared: {C}. C determines A, so C is the key of (A,C). Lossless.</p>
               </div>
             </details>
           </div>
 
-          <p class="task">Multiple correct decompositions exist. If you started with <code class="inline">C → A</code> first, you'd end up with a different (still valid) set of relations.</p>
+          <p class="task">If you decomposed using <code class="inline">C &rarr; A</code> first, you get different relations. Both decompositions are correct.</p>
 
         </div>
       </section>
 
       <!-- ============================================
-           2. B+ TREE
+           2. B+ TREES - THEORY
            ============================================ -->
-      <section id="bptree" class="lab-section lab-section--alt">
+      <section id="bptree-theory" class="lab-section">
         <h2 class="section-title">2. B+ Trees</h2>
         <div class="section-body">
 
-          <p>Insert these 16 keys into an empty B+ tree in the given order. Each node holds up to 4 keys.</p>
+          <h3>Why a tree index exists</h3>
+
+          <p>A database table can have millions of rows. Scanning every row to answer a query is too slow. A B+ tree is an index: a separate structure that lets you jump straight to the rows you need.</p>
+
+          <p>The tree is organized so that at each level you make a routing decision ("go left, middle, or right?") and by the time you reach the bottom you're exactly at the right data. Every level you visit is one disk read, and the tree stays short enough that you only need two or three disk reads for any query.</p>
+
+          <h3>Structure</h3>
+
+          <p>A B+ tree has two kinds of nodes. <strong>Internal nodes</strong> are routers: they hold keys that act as dividers, telling you which child to follow. <strong>Leaf nodes</strong> hold the actual data keys (and in a real database, pointers to the rows).</p>
+
+<pre class="state">Internal node: routes the search
+                    [ 31 | 54 ]
+                   /     |     \
+        go here       go here     go here
+        if &lt; 31    if 31..53   if &ge; 54
+
+Leaf nodes: hold the real keys
+  [ 16 | 24 ]    [ 31 | 49 ]    [ 54 | 76 | 85 ]</pre>
+
+          <p>To search for 49: at the root, 49 is between 31 and 54, so go middle. At the leaf, 49 is there. Two disk reads total.</p>
+
+          <h3>The order constraint</h3>
+
+          <p>Every node except the root must hold between <strong>d</strong> and <strong>2d</strong> keys, where d is the tree's order. This keeps the tree balanced: no node is ever empty, and no node ever overflows. In this lab, <strong>d = 2</strong>, so each non-root node holds between 2 and 4 keys.</p>
+
+          <h3>Inserting a key</h3>
+
+          <p>Find the right leaf (follow the routing keys from root to leaf), then insert the key in sorted order. If the leaf now holds 2d+1 = 5 keys, it overflows and must split.</p>
+
+          <h3>Leaf split: copy up</h3>
+
+          <p>When a leaf overflows, split it evenly. The middle key (the first key of the right half) is <strong>copied</strong> into the parent as a new routing key. It stays in the leaf too, because leaves must hold every actual key.</p>
+
+<pre class="state">Leaf [ 13 | 15 | 16 | 18 | 24 ] overflows (5 keys, d=2)
+
+Split point: first key of right half = 18
+
+Left leaf:   [ 13 | 15 | 16 ]
+Right leaf:  [ 18 | 24 ]         &larr; 18 stays here
+
+Parent gains the routing key 18 (copied up, not removed from leaf)</pre>
+
+          <h3>Internal node split: push up</h3>
+
+          <p>If adding a routing key to an internal node causes it to overflow, that node splits too. The middle key of the internal node is <strong>pushed</strong> up to the parent. Unlike a leaf split, the middle key leaves the node entirely, it does not stay in either child.</p>
+
+<pre class="state">Internal node [ 10 | 20 | 30 | 40 | 50 ] overflows (5 keys)
+
+Middle key: 30
+
+Left child:  [ 10 | 20 ]
+Right child: [ 40 | 50 ]     &larr; 30 is NOT here
+Parent gains 30 (pushed up, removed from this node)</pre>
+
+          <p>If the root splits, a new root is created one level above it and the tree grows taller.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           2. B+ TREES - EXERCISE
+           ============================================ -->
+      <section id="bptree-exercise" class="lab-section lab-section--alt">
+        <h2 class="section-title">Exercise: build the tree</h2>
+        <div class="section-body">
+
+          <p>Insert these 16 keys into an empty B+ tree in the given order. Order d = 2, so each node holds at most 4 keys.</p>
 
 <pre><code class="language-none">49, 24, 54, 31, 16, 76, 85, 68, 15, 40, 13, 35, 67, 18, 17, 29</code></pre>
 
-          <p>The tree starts empty. The first 4 inserts just fill a single leaf:</p>
+          <p>The first four inserts fill a single leaf with no split needed:</p>
 
 <pre class="state">After 49, 24, 54, 31:
 
   [ 24 | 31 | 49 | 54 ]</pre>
 
-          <h3>Step 1. Insert 16, first split</h3>
-          <p>The leaf is full. Adding 16 makes 5 keys, so split.</p>
+          <h3>Step 1. Insert 16</h3>
+          <p>The leaf is full. Adding 16 makes 5 keys, so the leaf splits.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
-            <p class="query-card__question">Split the leaf, copy the right half's smallest key up to a new root, and draw the tree.</p>
+            <p class="query-card__question">Split the leaf and copy the right half's smallest key up to a new root. Draw the tree.</p>
             <details>
               <summary>Show answer</summary>
 <pre class="state">After 16:
@@ -392,12 +361,12 @@ C  → A</code></pre>
            [ 31 ]
            /    \
   [ 16 | 24 ]   [ 31 | 49 | 54 ]</pre>
-              <p>The smallest key of the right leaf (31) is <strong>copied</strong> up. It still appears in the right leaf, that's correct for leaves.</p>
+              <p>31 is copied up (it still sits in the right leaf).</p>
             </details>
           </div>
 
           <h3>Step 2. Insert 76, 85, 68</h3>
-          <p>76 fits in the right leaf. 85 overflows it, so split. 68 then goes in the appropriate leaf.</p>
+          <p>76 fits in the right leaf. 85 overflows it, triggering another leaf split. 68 then lands in the correct leaf.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
@@ -409,21 +378,20 @@ C  → A</code></pre>
            /    \
   [ 16 | 24 ]   [ 31 | 49 | 54 | 76 ]
 
-After 85: right leaf has 5 keys, split.
+After 85: right leaf overflows, split. Right half starts at 54, copy 54 up.
             [ 31 | 54 ]
            /    |     \
   [16|24]  [31|49]   [54|76|85]
 
-After 68: 68 goes in the middle leaf (between 49 and 76 range).
+After 68: 68 belongs in [31|49] (between 31 and 54).
             [ 31 | 54 ]
            /    |     \
   [16|24]  [31|49|68]   [54|76|85]</pre>
-              <p>When a leaf splits, the smallest key of the right half (here 54) is copied up.</p>
             </details>
           </div>
 
           <h3>Step 3. Insert 15, 40</h3>
-          <p>15 goes in the leftmost leaf, no overflow. 40 fills the middle leaf.</p>
+          <p>15 goes in the leftmost leaf. 40 fills the middle leaf. No splits yet.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
@@ -435,7 +403,7 @@ After 68: 68 goes in the middle leaf (between 49 and 76 range).
               [ 31 | 54 ]
              /    |     \
   [15|16|24]  [31|40|49|68]   [54|76|85]</pre>
-              <p>No splits, but the middle leaf is now full.</p>
+              <p>No splits. Middle leaf is now full (4 keys).</p>
             </details>
           </div>
 
@@ -444,7 +412,7 @@ After 68: 68 goes in the middle leaf (between 49 and 76 range).
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
-            <p class="query-card__question">Insert 13, then 35, and split the middle leaf.</p>
+            <p class="query-card__question">Insert 13, then 35. Split where needed and draw the result.</p>
             <details>
               <summary>Show answer</summary>
 <pre class="state">After 13:
@@ -452,22 +420,22 @@ After 68: 68 goes in the middle leaf (between 49 and 76 range).
              /    |     \
   [13|15|16|24]  [31|40|49|68]   [54|76|85]
 
-After 35: middle leaf becomes [31|35|40|49|68], split.
-Right half is [40|49|68], smallest key 40 is copied up.
+After 35: middle leaf becomes [31|35|40|49|68], overflows.
+Right half starts at 40, copy 40 up to the root.
 
               [ 31 | 40 | 54 ]
              /    |    |    \
   [13|15|16|24] [31|35] [40|49|68] [54|76|85]</pre>
-              <p>The root now holds 3 keys, still room for one more.</p>
+              <p>Root now holds 3 keys, room for one more.</p>
             </details>
           </div>
 
           <h3>Step 5. Insert 67, 18</h3>
-          <p>67 fits in the third leaf (becomes full). 18 overflows the leftmost leaf and triggers an index split.</p>
+          <p>67 fills the third leaf. 18 overflows the leftmost leaf and its split key propagates up to the root.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
-            <p class="query-card__question">Insert 67. Then insert 18 and walk through the splits.</p>
+            <p class="query-card__question">Insert 67, then 18. Walk through the leaf split and show the new root.</p>
             <details>
               <summary>Show answer</summary>
 <pre class="state">After 67:
@@ -475,19 +443,18 @@ Right half is [40|49|68], smallest key 40 is copied up.
              /    |    |    \
   [13|15|16|24] [31|35] [40|49|67|68] [54|76|85]
 
-After 18: leftmost leaf [13|15|16|18|24] has 5 keys, split.
-Right half is [18|24], smallest key 18 copied up.
-Root becomes [18 | 31 | 40 | 54], 4 keys, still OK.
+After 18: leftmost leaf [13|15|16|18|24] overflows.
+Right half starts at 18, copy 18 up. Root becomes [18|31|40|54], still 4 keys, OK.
 
               [ 18 | 31 | 40 | 54 ]
              /    |    |    |    \
   [13|15|16]  [18|24]  [31|35]  [40|49|67|68]  [54|76|85]</pre>
-              <p>The root is now full. The next index-level overflow will split the root and grow the tree.</p>
+              <p>Root is now full. The next key that propagates up here will split the root.</p>
             </details>
           </div>
 
           <h3>Step 6. Insert 17, 29</h3>
-          <p>17 goes in [13|15|16] (now full). 29 goes in [18|24].</p>
+          <p>17 goes in [13|15|16], filling it. 29 goes in [18|24], no overflow.</p>
 
           <div class="query-card">
             <span class="query-card__label">Try first</span>
@@ -499,17 +466,17 @@ Root becomes [18 | 31 | 40 | 54], 4 keys, still OK.
              /    |    |    |    \
   [13|15|16|17] [18|24] [31|35] [40|49|67|68] [54|76|85]
 
-After 29:  29 belongs in [18|24], becomes [18|24|29], no split.
+After 29: 29 goes into [18|24], becomes [18|24|29]. No overflow.
 
 Final tree:
               [ 18 | 31 | 40 | 54 ]
              /    |    |    |    \
   [13|15|16|17] [18|24|29] [31|35] [40|49|67|68] [54|76|85]</pre>
-              <p>The tree finished at height 2 (root plus one leaf level) with all 16 keys placed. Different insertion orders give different trees.</p>
+              <p>All 16 keys placed. Height 2 (root plus one leaf level).</p>
             </details>
           </div>
 
-          <p class="task">If your tree differs from this one but every non-root node has 2 to 4 keys and the keys are in the right order, you almost certainly got it right too.</p>
+          <p class="task">If your tree differs but every non-root node has 2 to 4 keys and the order is correct, you almost certainly got it right.</p>
 
         </div>
       </section>
@@ -517,27 +484,27 @@ Final tree:
       <!-- ============================================
            COMMON MISTAKES
            ============================================ -->
-      <section id="troubleshooting" class="lab-section">
+      <section id="mistakes" class="lab-section">
         <h2 class="section-title">Common mistakes</h2>
         <div class="section-body">
 
-          <h3>"I got a different candidate key, am I wrong?"</h3>
-          <p>Probably not. A relation can have several candidate keys. Compute the closure of yours, if it gives all attributes and no proper subset of it does, it's a valid candidate key. In the warm-up example both AB and BC are candidate keys.</p>
+          <h3>"I got a different candidate key"</h3>
+          <p>Probably fine. Compute the closure of your key: if it reaches all attributes and no proper subset does the same, it's a valid candidate key. The relation in the exercise has two: AB and BC.</p>
 
-          <h3>"My BCNF decomposition has different relations than the reveal"</h3>
-          <p>Also probably fine. Picking a different violating FD first gives different (still correct) final relations. Check that each of your final relations has its key on the left of every FD that holds inside it, that's the BCNF check.</p>
+          <h3>"My decomposition gives different relations than the reveal"</h3>
+          <p>Also probably fine. Choosing a different violating FD first leads to a different but equally valid BCNF decomposition. The check is: in each of your final relations, does every non-trivial FD have a superkey on the left?</p>
 
           <h3>"My decomposition is not dependency preserving"</h3>
-          <p>It might not be. BCNF decompositions are always lossless but not always dependency preserving. If you need dependency preservation, fall back to 3NF (which keeps all FDs but allows some redundancy).</p>
+          <p>BCNF decompositions are always lossless but not always dependency preserving. That's a known trade-off. If you need dependency preservation, 3NF is the alternative (it keeps all FDs but allows some redundancy).</p>
 
-          <h3>"I confused copy-up with push-up"</h3>
-          <p>Leaf splits <strong>copy</strong> the dividing key up (it still appears in the leaf). Index node splits <strong>push</strong> the dividing key up (it leaves the original node). The first is for finding rows, the second is for routing.</p>
+          <h3>"I mixed up copy-up and push-up"</h3>
+          <p><strong>Leaf split:</strong> the dividing key is copied up. It still lives in the right leaf because leaves must hold every actual key. <strong>Internal node split:</strong> the middle key is pushed up. It leaves the node and only exists in the parent after the split.</p>
 
-          <h3>"My B+ tree is taller than the reveal"</h3>
-          <p>Probably fine if every non-root node has 2 to 4 keys. The exact height depends on whether borderline splits redistribute or actually split. As long as keys in left subtrees are smaller than the routing key and right subtrees are larger or equal, your tree is correct.</p>
+          <h3>"My tree is taller than the reveal"</h3>
+          <p>Probably fine, as long as every non-root node has 2 to 4 keys and the sort order is correct. Borderline cases can go either way depending on how you split.</p>
 
-          <h3>"I split a leaf into 1 and 4 instead of 2 and 3"</h3>
-          <p>Standard practice is to split evenly. After splitting a 5-key leaf, the left half should have 2 keys and the right 3 (or vice versa). 1 and 4 violates the minimum (d = 2).</p>
+          <h3>"I split a leaf 1 and 4 instead of 2 and 3"</h3>
+          <p>A 5-key overflow should split into 2 keys and 3 keys (or 3 and 2). Splitting into 1 and 4 leaves the smaller piece below the minimum d = 2, which is not allowed.</p>
 
         </div>
       </section>
