@@ -3,12 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Boston University CS460 Introduction to Database Systems — Summer 2026 — Lab 5">
-  <title>Lab 5 — CS460 Summer 2026</title>
+  <meta name="description" content="Boston University CS460 Introduction to Database Systems, Summer 2026, Lab 5: Counting disk I/Os for external sorting and join algorithms.">
+  <title>Lab 5: Counting Disk I/Os | CS460</title>
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -19,14 +18,13 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
 
-  <meta property="og:title" content="Lab 5 — CS460 Summer 2026">
+  <meta property="og:title" content="Lab 5: Counting Disk I/Os | CS460">
   <meta property="og:type" content="article">
 </head>
 
 <body data-page="lab">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- ===== Global Navigation ===== -->
   <nav class="nav" aria-label="Primary">
     <div class="nav__inner">
       <a class="nav__title" href="index.html">
@@ -64,77 +62,326 @@
     </div>
   </nav>
 
-  <!-- ===== Hero ===== -->
   <header class="hero">
-    <h1 class="hero__title">Lab 5</h1>
+    <h1 class="hero__title hero__title--lab">Lab 5<span class="hero__subtitle">Counting Disk I/Os</span></h1>
   </header>
 
-  <!-- ===== Main ===== -->
   <main id="main" class="lab-layout">
 
-    <!-- Sidebar TOC (desktop) -->
     <aside class="toc" aria-label="Table of contents">
       <p class="toc__label">On this page</p>
       <ul class="toc__list">
-        <li><a href="#overview">1. Overview</a></li>
-        <li><a href="#concepts">2. Concepts</a></li>
-        <li><a href="#walkthrough">3. Walkthrough</a></li>
-        <li><a href="#examples">4. Examples</a></li>
+        <li><a href="#bigidea">0. The one big idea</a></li>
+        <li><a href="#sort-theory">1. External Sorting</a></li>
+        <li><a href="#sort-exercise">&#8627; Your turn</a></li>
+        <li><a href="#join-theory">2. Join Costs</a></li>
+        <li><a href="#join-exercise">&#8627; Your turn</a></li>
+        <li><a href="#mistakes">Common mistakes</a></li>
       </ul>
     </aside>
 
-    <!-- Content column -->
     <div class="lab-content">
 
       <details class="toc-mobile">
         <summary>On this page ▾</summary>
         <ul>
-          <li><a href="#overview">1. Overview</a></li>
-          <li><a href="#concepts">2. Concepts</a></li>
-          <li><a href="#walkthrough">3. Walkthrough</a></li>
-          <li><a href="#examples">4. Examples</a></li>
+          <li><a href="#bigidea">0. The one big idea</a></li>
+          <li><a href="#sort-theory">1. External Sorting</a></li>
+          <li><a href="#sort-exercise">Your turn</a></li>
+          <li><a href="#join-theory">2. Join Costs</a></li>
+          <li><a href="#join-exercise">Your turn</a></li>
+          <li><a href="#mistakes">Common mistakes</a></li>
         </ul>
       </details>
 
-      <section id="overview" class="lab-section">
-        <h2 class="section-title">1. Overview</h2>
+      <!--============================================
+           0. THE ONE BIG IDEA
+           ============================================ -->
+      <section id="bigidea" class="lab-section">
+        <h2 class="section-title">0. The one big idea</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>This whole lab is just one idea repeated:</p>
+
+<pre class="state">Cost of an operation  =  how many PAGES it reads or writes from disk.
+
+  read 1 page  = 1 I/O
+  write 1 page = 1 I/O</pre>
+
+          <p>Reading from disk is the slow part of a database, much slower than anything the CPU does. So when we ask "how expensive is this query?" we just count page reads and writes and ignore everything else. Every number in this lab is a count of pages. That's the entire game.</p>
+
+          <p>Two words we'll use the whole time:</p>
+
+          <ul>
+            <li><strong>N</strong> or <strong>M</strong> = the size of a table, measured in <em>pages</em> (not rows).</li>
+            <li><strong>B</strong> = the size of our buffer pool, i.e. how many pages of memory we get to use at once.</li>
+          </ul>
+
         </div>
       </section>
 
-      <section id="concepts" class="lab-section lab-section--alt">
-        <h2 class="section-title">2. Concepts</h2>
+      <!--============================================
+           1. EXTERNAL SORTING - THEORY (short)
+           ============================================ -->
+      <section id="sort-theory" class="lab-section">
+        <h2 class="section-title">1. External Sorting</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <h3>The situation</h3>
+
+          <p>We need to sort a table, but it is way bigger than memory. We can't load it all in and call sort(). So we sort it in <strong>passes</strong>, reading and writing the file to disk one pass at a time.</p>
+
+          <ul>
+            <li><strong>Pass 0:</strong> read the file B pages at a time, sort each chunk in memory, write it back out. Each sorted chunk is called a <strong>run</strong>.</li>
+            <li><strong>Later passes:</strong> merge runs together into bigger runs. With B buffers we can merge <strong>B&minus;1</strong> runs at once (1 buffer is saved for the output). We keep merging until there is just one run left, which is the fully sorted file.</li>
+          </ul>
+
+          <p>Two facts are all you need:</p>
+
+<pre class="state">number of passes = 1 + &lceil; log(B-1) of &lceil;N/B&rceil; &rceil;
+
+total cost = 2N &times; (number of passes)</pre>
+
+          <p>Why <code class="inline">2N</code> per pass? Because every pass reads all N pages once and writes all N pages once. Read + write = 2N. Simple.</p>
+
+          <p>Don't memorize the log formula yet. Just watch the example below count passes by hand, then the formula will feel obvious.</p>
+
+          <h3>Worked example</h3>
+
+          <p>Sort a file of <strong>N = 108 pages</strong> using <strong>B = 5 buffer pages</strong>.</p>
+
+<pre class="state">Pass 0: read 5 pages at a time, sort each, write back.
+        108 / 5 = 21.6  &rarr;  round up to 22 runs of 5 pages each.
+        (we now have 22 sorted runs on disk)
+
+Pass 1: merge B-1 = 4 runs at a time.
+        22 / 4 = 5.5  &rarr;  6 bigger runs.
+
+Pass 2: merge 4 at a time again.
+        6 / 4 = 1.5  &rarr;  2 runs.
+
+Pass 3: merge those 2 runs into 1.
+        DONE. 1 fully sorted run.</pre>
+
+          <p>Count the passes: 0, 1, 2, 3 &rarr; that's <strong>4 passes</strong>.</p>
+
+<pre class="state">Check with the formula:
+  1 + &lceil; log4 of &lceil;108/5&rceil; &rceil;
+= 1 + &lceil; log4 of 22 &rceil;
+= 1 + 3            (because 4&sup3; = 64 &ge; 22, but 4&sup2; = 16 &lt; 22)
+= 4 passes   &#10003;
+
+Total I/O cost = 2N &times; passes
+              = 2 &times; 108 &times; 4
+              = 864 I/Os.</pre>
+
+          <p>That's the whole topic. Count how many passes it takes to get down to 1 run, then multiply <code class="inline">2N &times; passes</code>.</p>
+
         </div>
       </section>
 
-      <section id="walkthrough" class="lab-section">
-        <h2 class="section-title">3. Walkthrough</h2>
+      <!-- ============================================
+           1. EXTERNAL SORTING - YOUR TURN
+           ============================================ -->
+      <section id="sort-exercise" class="lab-section lab-section--alt">
+        <h2 class="section-title">Your turn: external sorting</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>Same idea, smaller numbers. Sort a file of <strong>N = 80 pages</strong> with <strong>B = 5 buffer pages</strong>.</p>
+
+          <div class="query-card">
+            <span class="query-card__label">Try first</span>
+            <p class="query-card__question">How many runs does Pass 0 make?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+                <p>Pass 0 sorts B = 5 pages at a time.</p>
+                <p><code class="inline">80 / 5 = 16</code> &rarr; <strong>16 runs</strong> of 5 pages each.</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Try first</span>
+            <p class="query-card__question">How many total passes? (keep merging 4 at a time until 1 run)</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+<pre class="state">Pass 0: 16 runs
+Pass 1: 16 / 4 = 4 runs
+Pass 2: 4 / 4  = 1 run  &rarr; DONE</pre>
+                <p>Passes 0, 1, 2 &rarr; <strong>3 passes</strong>.</p>
+                <p>Formula check: <code class="inline">1 + &lceil;log4 of 16&rceil; = 1 + 2 = 3</code>. &#10003;</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Try first</span>
+            <p class="query-card__question">What is the total I/O cost?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+                <p><code class="inline">2N &times; passes = 2 &times; 80 &times; 3 = <strong>480 I/Os</strong></code>.</p>
+              </div>
+            </details>
+          </div>
+
         </div>
       </section>
 
-      <section id="examples" class="lab-section lab-section--alt">
-        <h2 class="section-title">4. Examples</h2>
+      <!-- ============================================
+           2. JOIN COSTS - THEORY (short) + worked examples
+           ============================================ -->
+      <section id="join-theory" class="lab-section">
+        <h2 class="section-title">2. Join Costs</h2>
         <div class="section-body">
-          <p class="placeholder"><em>Content for this section will be added soon.</em></p>
+
+          <p>A <strong>join</strong> matches rows from two tables that share a value (for example, match each reservation to the sailor who made it). There are several ways to do it, and they cost wildly different amounts of I/O. We'll count the cost of three of them on the same two tables.</p>
+
+          <h3>Our two tables (memorize these numbers)</h3>
+
+<pre class="state">R = Reserves :  M = 1000 pages,  100 rows per page
+S = Sailors  :  N =  500 pages,   80 rows per page</pre>
+
+          <p>We are joining R and S. In all three methods below, one table is the <strong>outer</strong> (the one in the outer loop) and the other is the <strong>inner</strong> (re-scanned again and again).</p>
+
+          <h3>Method 1 &mdash; Simple Nested Loops (the slow one)</h3>
+
+          <p>For <em>every single row</em> of the outer table, scan the <em>entire</em> inner table. Notice it says every <strong>row</strong>, not every page &mdash; that's what makes it terrible.</p>
+
+<pre class="state">Cost = (rows in outer) &times; (pages in inner) + (pages in outer)
+
+With R outer:
+  rows in R = 1000 pages &times; 100 rows = 100,000 rows
+  Cost = 100,000 &times; 500 + 1000
+       = 50,001,000 I/Os    &larr; about 50 million. Awful.</pre>
+
+          <p>Fifty million page reads. This is the version we never want.</p>
+
+          <h3>Method 2 &mdash; Page Nested Loops (a bit smarter)</h3>
+
+          <p>Same idea, but loop over <strong>pages</strong> instead of rows. For every page of the outer, scan all pages of the inner.</p>
+
+<pre class="state">Cost = (pages in outer) &times; (pages in inner) + (pages in outer)
+
+With R outer:
+  Cost = 1000 &times; 500 + 1000 = 501,000 I/Os
+
+With S outer (smaller table outside):
+  Cost = 500 &times; 1000 + 500 = 500,500 I/Os</pre>
+
+          <p>From 50 million down to ~500 thousand just by looping over pages, not rows. And putting the <strong>smaller table on the outside</strong> is slightly better. (Good rule of thumb: smaller relation outer.)</p>
+
+          <h3>Method 3 &mdash; Block Nested Loops (the practical one)</h3>
+
+          <p>The trick: use most of our memory to hold a big <strong>block</strong> of the outer table at once. If we can hold 100 outer pages in memory, then we only scan the inner table once per <em>block of 100 pages</em>, instead of once per single page. Far fewer scans of the inner.</p>
+
+<pre class="state">Cost = (pages in outer) + (number of outer blocks) &times; (pages in inner)
+
+number of outer blocks = ceil( pages in outer / block size )</pre>
+
+          <p>Say our block holds 100 pages of the outer table.</p>
+
+<pre class="state">With R outer (1000 pages, block = 100):
+  number of blocks = 1000 / 100 = 10
+  Cost = 1000 + 10 &times; 500 = 6000 I/Os
+
+With S outer (500 pages, block = 100):
+  number of blocks = 500 / 100 = 5
+  Cost = 500 + 5 &times; 1000 = 5500 I/Os</pre>
+
+          <p>From 500,000 down to ~6000. Same data, same join &mdash; just a smarter use of memory. This is why the buffer pool size B matters so much: a bigger block means fewer inner scans.</p>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           2. JOIN COSTS - YOUR TURN
+           ============================================ -->
+      <section id="join-exercise" class="lab-section lab-section--alt">
+        <h2 class="section-title">Your turn: join costs</h2>
+        <div class="section-body">
+
+          <p>Same two tables. Reminder:</p>
+
+<pre class="state">R = Reserves :  M = 1000 pages,  100 rows per page
+S = Sailors  :  N =  500 pages,   80 rows per page</pre>
+
+          <div class="query-card">
+            <span class="query-card__label">Try first</span>
+            <p class="query-card__question">Page Nested Loops with <strong>S as the outer</strong> table. What is the cost?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+                <p>Cost = (outer pages) &times; (inner pages) + (outer pages).</p>
+                <p><code class="inline">500 &times; 1000 + 500 = <strong>500,500 I/Os</strong></code>.</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Try first</span>
+            <p class="query-card__question">Block Nested Loops with <strong>R as the outer</strong> and a block that holds <strong>200 pages</strong>. What is the cost?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+<pre class="state">number of blocks = 1000 / 200 = 5
+Cost = 1000 + 5 &times; 500 = 1000 + 2500 = 3500 I/Os</pre>
+                <p>Notice: a bigger block (200 instead of 100) made it cheaper than the 6000 we got earlier. More memory &rarr; fewer inner scans &rarr; lower cost.</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="query-card">
+            <span class="query-card__label">Try first</span>
+            <p class="query-card__question">Which is cheaper for Block Nested Loops: R outer or S outer (both with a 100-page block)? Why?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+                <p>R outer = 6000, S outer = 5500. <strong>S outer is cheaper.</strong></p>
+                <p>The smaller table (S) makes fewer blocks, so the bigger table only gets scanned a few times. Smaller relation outer wins again.</p>
+              </div>
+            </details>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           COMMON MISTAKES
+           ============================================ -->
+      <section id="mistakes" class="lab-section">
+        <h2 class="section-title">Common mistakes</h2>
+        <div class="section-body">
+
+          <h3>"I counted rows when I should have counted pages"</h3>
+          <p>Cost is measured in <strong>pages</strong> (I/Os), not rows. The only place rows show up is Simple Nested Loops, where the outer loop runs once per row &mdash; and that is exactly why it costs millions.</p>
+
+          <h3>"I forgot to round up"</h3>
+          <p>You always round <em>up</em> when counting runs or blocks, because a leftover half-page still needs a whole pass / a whole block. <code class="inline">22/4 = 5.5</code> means <strong>6</strong> runs, never 5.</p>
+
+          <h3>"I put the wrong table on the outside"</h3>
+          <p>For nested-loop joins, the <strong>smaller</strong> table goes on the outside. Fewer outer pages (or blocks) means fewer scans of the inner table.</p>
+
+          <h3>"My pass count is off by one"</h3>
+          <p>Pass 0 counts as a pass. Count 0, 1, 2, 3&hellip; until you are down to a single run. If the file fits in B pages from the start, that's just Pass 0 = 1 pass.</p>
+
+          <h3>"I used B instead of B&minus;1 when merging"</h3>
+          <p>Pass 0 uses all B buffers to sort. But every <em>merge</em> pass keeps one buffer for output, so it merges only <strong>B&minus;1</strong> runs at a time.</p>
+
         </div>
       </section>
 
     </div>
   </main>
 
-  <!-- ===== Footer ===== -->
   <footer class="footer">
     <div class="footer__inner">
       CS460 Summer 2026 &middot; Boston University
     </div>
   </footer>
 
-  <!-- ===== Search Overlay ===== -->
   <div id="search-overlay" class="search-overlay" role="dialog" aria-modal="true" aria-label="Search">
     <div class="search__bar">
       <button class="search__back" type="button" aria-label="Close search">
