@@ -274,7 +274,7 @@ Pass 3: ceil(4 / 4)  = 1 run  &rarr; DONE</pre>
         <h2 class="section-title">2. Join Costs</h2>
         <div class="section-body">
 
-          <p>A <strong>join</strong> matches rows from two tables that share a value, for example matching each reservation to the sailor who made it. There are several algorithms for it, and they differ greatly in I/O cost. We count the cost of three of them on the same two tables.</p>
+          <p>A <strong>join</strong> matches rows from two tables that share a value, for example matching each reservation to the sailor who made it. There are several algorithms for it, and they differ greatly in I/O cost. We count the cost of four of them on the same two tables.</p>
 
           <h3>The two tables</h3>
 
@@ -330,6 +330,22 @@ With S outer (500 pages, block = 100):
 
           <p>The cost drops from about 500,000 to about 6000 on the same join. This is why the buffer size B matters: a larger block means fewer scans of the inner table.</p>
 
+          <h3>Method 4: Hash Join</h3>
+
+          <p>Instead of looping, both tables are split into matching partitions using the same hash function, so rows that could join always land in the same partition. The partitioning phase reads and writes both tables, and the matching phase reads both once more. When the smaller table meets the memory condition, the total is the same regardless of which table is outer.</p>
+
+<pre class="state">Cost = 3 &times; (M + N)
+
+  partitioning phase: read + write both tables = 2(M + N)
+  matching phase:     read both once more      =  (M + N)
+  total                                        = 3(M + N)</pre>
+
+          <p>For R and S:</p>
+
+<pre class="state">Cost = 3 &times; (1000 + 500) = 3 &times; 1500 = 4500 I/Os</pre>
+
+          <p>This is cheaper than the best Block Nested Loop plan (5500) and far cheaper than Page Nested Loops or Simple Nested Loops. On an exam, after costing a nested-loop plan, replacing it with a Hash Join is the standard way to propose a plan that is roughly ten times cheaper or more.</p>
+
         </div>
       </section>
 
@@ -379,19 +395,16 @@ Cost = 1000 + 5 &times; 500 = 1000 + 2500 = 3500 I/Os</pre>
             </details>
           </div>
 
-          <h3>Propose a cheaper plan</h3>
-          <p>Exam questions often ask you to improve a plan. The standard improvement is to replace the nested-loop join with a Hash Join (or Sort-Merge Join), whose cost is <code class="inline">3 &times; (M + N)</code> when the smaller table meets the memory condition. The partitioning phase reads and writes both tables (2(M+N)) and the matching phase reads both once more (M+N), giving 3(M+N) in total.</p>
-
           <div class="query-card">
-            <p class="query-card__question">What is the Hash Join cost for R and S, and how much does it save over the 5500 Block Nested Loop plan?</p>
+            <p class="query-card__question">A different pair of tables has <strong>M = 800 pages</strong> and <strong>N = 300 pages</strong>. What is the Hash Join cost?</p>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
 <pre class="state">Hash Join cost = 3 &times; (M + N)
-              = 3 &times; (1000 + 500)
-              = 3 &times; 1500
-              = 4500 I/Os</pre>
-                <p>That is cheaper than the best Block Nested Loop plan (5500), and far cheaper than Page Nested Loops (about 500,000) or Simple Nested Loops (about 50 million). On a final, this is the kind of optimization you propose after costing the original plan.</p>
+              = 3 &times; (800 + 300)
+              = 3 &times; 1100
+              = 3300 I/Os</pre>
+                <p>Hash Join cost depends only on the two table sizes, not on which one is outer.</p>
               </div>
             </details>
           </div>
