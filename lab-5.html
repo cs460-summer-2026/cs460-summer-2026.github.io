@@ -76,7 +76,6 @@
         <li><a href="#sort-exercise">&#8627; Exercise</a></li>
         <li><a href="#join-theory">2. Join Costs</a></li>
         <li><a href="#join-exercise">&#8627; Exercise</a></li>
-        <li><a href="#exam-exercise">3. Exam-style Problem</a></li>
         <li><a href="#mistakes">Common mistakes</a></li>
       </ul>
     </aside>
@@ -91,7 +90,6 @@
           <li><a href="#sort-exercise">Exercise</a></li>
           <li><a href="#join-theory">2. Join Costs</a></li>
           <li><a href="#join-exercise">Exercise</a></li>
-          <li><a href="#exam-exercise">3. Exam-style Problem</a></li>
           <li><a href="#mistakes">Common mistakes</a></li>
         </ul>
       </details>
@@ -119,7 +117,7 @@
             <li><strong>B</strong>: the size of the buffer pool, that is, how many pages of memory are available at one time.</li>
           </ul>
 
-          <p>When a problem gives you a table as a number of tuples instead of pages, your first step is always to convert tuples into pages. Section 3 shows how.</p>
+          <p>When a problem gives you a table as a number of tuples instead of pages, your first step is always to convert tuples into pages. The exercise in Section 1 shows how.</p>
 
         </div>
       </section>
@@ -191,7 +189,44 @@ Total I/O cost = 2N &times; passes
         <h2 class="section-title">Exercise: external sorting</h2>
         <div class="section-body">
 
-          <p>Same method, smaller numbers. Sort a file of <strong>N = 80 pages</strong> with <strong>B = 5 buffer pages</strong>.</p>
+          <p>Exam questions usually give a table as a number of tuples, not pages, so the first job is to convert tuples into pages. We do that here, then sort the result.</p>
+
+<pre class="state">Schema:  Sailor(sid: integer, name: char(20), rating: integer)
+Sizes:   integer = 4 bytes,  char(n) = n bytes
+         page size = 100 bytes,  buffer pool B = 5 pages
+Stats:   Sailor has 800 tuples</pre>
+
+          <h3>Step 1. Tuple size, then tuples per page</h3>
+          <p>Add up the bytes in one tuple, then see how many whole tuples fit in a 100-byte page. A tuple cannot be split across pages, so round the tuples-per-page <em>down</em>.</p>
+
+          <div class="query-card">
+            <p class="query-card__question">How many tuples fit on one page?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+<pre class="state">Sailor tuple = 4 (sid) + 20 (name) + 4 (rating) = 28 bytes
+  tuples per page = floor(100 / 28) = floor(3.57) = 3</pre>
+                <p>Round down, because a partial tuple cannot be stored on a page.</p>
+              </div>
+            </details>
+          </div>
+
+          <h3>Step 2. Pages in the table</h3>
+          <p>Divide total tuples by tuples per page, and round <em>up</em> (a leftover handful of tuples still needs one more page).</p>
+
+          <div class="query-card">
+            <p class="query-card__question">How many pages does Sailor occupy?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+<pre class="state">pages = ceil(800 / 3) = ceil(266.7) = 267  &rarr;  N = 267</pre>
+                <p>To keep the rest of the arithmetic clean, round this working size to <strong>N = 270 pages</strong> for the steps below.</p>
+              </div>
+            </details>
+          </div>
+
+          <h3>Step 3. Sort it</h3>
+          <p>Now sort N = 270 pages with B = 5 buffer pages, the same way as the worked example.</p>
 
           <div class="query-card">
             <p class="query-card__question">How many runs does Pass 0 make?</p>
@@ -199,7 +234,7 @@ Total I/O cost = 2N &times; passes
               <summary>Show answer</summary>
               <div class="answer">
                 <p>Pass 0 sorts B = 5 pages at a time.</p>
-                <p><code class="inline">80 / 5 = 16</code> &rarr; <strong>16 runs</strong> of 5 pages each.</p>
+                <p><code class="inline">ceil(270 / 5) = 54</code> &rarr; <strong>54 runs</strong> of 5 pages each.</p>
               </div>
             </details>
           </div>
@@ -209,11 +244,12 @@ Total I/O cost = 2N &times; passes
             <details>
               <summary>Show answer</summary>
               <div class="answer">
-<pre class="state">Pass 0: 16 runs
-Pass 1: 16 / 4 = 4 runs
-Pass 2: 4 / 4  = 1 run  &rarr; DONE</pre>
-                <p>Passes 0, 1, 2, which is <strong>3 passes</strong>.</p>
-                <p>Formula check: <code class="inline">1 + &lceil;log4 of 16&rceil; = 1 + 2 = 3</code>. &#10003;</p>
+<pre class="state">Pass 0: 54 runs
+Pass 1: ceil(54 / 4) = 14 runs
+Pass 2: ceil(14 / 4) = 4 runs
+Pass 3: ceil(4 / 4)  = 1 run  &rarr; DONE</pre>
+                <p>Passes 0, 1, 2, 3, which is <strong>4 passes</strong>.</p>
+                <p>Formula check: <code class="inline">1 + &lceil;log4 of 54&rceil; = 1 + 3 = 4</code> (4&sup3; = 64 &ge; 54). &#10003;</p>
               </div>
             </details>
           </div>
@@ -223,7 +259,7 @@ Pass 2: 4 / 4  = 1 run  &rarr; DONE</pre>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
-                <p><code class="inline">2N &times; passes = 2 &times; 80 &times; 3 = <strong>480 I/Os</strong></code>.</p>
+                <p><code class="inline">2N &times; passes = 2 &times; 270 &times; 4 = <strong>2160 I/Os</strong></code>.</p>
               </div>
             </details>
           </div>
@@ -343,107 +379,22 @@ Cost = 1000 + 5 &times; 500 = 1000 + 2500 = 3500 I/Os</pre>
             </details>
           </div>
 
-        </div>
-      </section>
-
-      <!-- ============================================
-           3. EXAM-STYLE PROBLEM
-           ============================================ -->
-      <section id="exam-exercise" class="lab-section lab-section--alt">
-        <h2 class="section-title">3. Exam-style Problem</h2>
-        <div class="section-body">
-
-          <p>Final-exam join questions do not hand you the page counts. They give you table statistics and a page size, and you convert them to pages yourself before costing the plan. This exercise walks through that full process on a small schema.</p>
-
-          <h3>The setup</h3>
-
-<pre class="state">Schema:
-  Employee(eid: integer, name: char(20), dept: char(10))
-  Project (pid: integer, eid: integer, hours: integer)
-
-Sizes:
-  integer = 4 bytes,  char(n) = n bytes
-  page size = 100 bytes
-  buffer pool B = 12 pages
-
-Statistics:
-  Employee : 2000 tuples
-  Project  : 6000 tuples
-  eid is the primary key of Employee and a foreign key in Project</pre>
-
-          <p>We want the cost of joining Employee and Project on <code class="inline">eid</code> using a Block Nested Loop Join.</p>
-
-          <h3>Step 1. Tuple size, then tuples per page</h3>
-          <p>Add up the bytes in one tuple, then see how many whole tuples fit in a 100-byte page. A tuple cannot be split across pages, so round the tuples-per-page <em>down</em>.</p>
+          <h3>Propose a cheaper plan</h3>
+          <p>Exam questions often ask you to improve a plan. The standard improvement is to replace the nested-loop join with a Hash Join (or Sort-Merge Join), whose cost is <code class="inline">3 &times; (M + N)</code> when the smaller table meets the memory condition. The partitioning phase reads and writes both tables (2(M+N)) and the matching phase reads both once more (M+N), giving 3(M+N) in total.</p>
 
           <div class="query-card">
-            <p class="query-card__question">How many tuples fit on one page for each table?</p>
-            <details>
-              <summary>Show answer</summary>
-              <div class="answer">
-<pre class="state">Employee tuple = 4 (eid) + 20 (name) + 10 (dept) = 34 bytes
-  tuples per page = floor(100 / 34) = floor(2.94) = 2
-
-Project tuple  = 4 (pid) + 4 (eid) + 4 (hours)   = 12 bytes
-  tuples per page = floor(100 / 12) = floor(8.33) = 8</pre>
-                <p>Round down because a partial tuple cannot be stored on a page.</p>
-              </div>
-            </details>
-          </div>
-
-          <h3>Step 2. Pages per table</h3>
-          <p>Divide total tuples by tuples per page, and round <em>up</em> (a leftover handful of tuples still needs one more page).</p>
-
-          <div class="query-card">
-            <p class="query-card__question">How many pages does each table occupy?</p>
-            <details>
-              <summary>Show answer</summary>
-              <div class="answer">
-<pre class="state">Employee : 2000 / 2 = 1000 pages   &rarr;  call this M = 1000
-Project  : 6000 / 8 = 750  pages   &rarr;  call this N =  750</pre>
-                <p>Now the problem looks like the join problems from Section 2, just with our own page counts.</p>
-              </div>
-            </details>
-          </div>
-
-          <h3>Step 3. Block Nested Loop cost</h3>
-          <p>Use the smaller table as the outer, with a block that holds B&minus;2 = 10 pages (one buffer for the inner, one for the output).</p>
-
-          <div class="query-card">
-            <p class="query-card__question">Put Project (the smaller table, 750 pages) as the outer with a block of 10 pages. What is the cost?</p>
-            <details>
-              <summary>Show answer</summary>
-              <div class="answer">
-<pre class="state">number of blocks = ceil(750 / 10) = 75
-Cost = (outer pages) + (blocks) &times; (inner pages)
-     = 750 + 75 &times; 1000
-     = 750 + 75,000
-     = 75,750 I/Os</pre>
-                <p>If instead Employee (1000 pages) were the outer:
-                ceil(1000 / 10) = 100 blocks, cost = 1000 + 100 &times; 750 = 76,000 I/Os.
-                Project outer is slightly cheaper, matching the smaller-relation-outer rule.</p>
-              </div>
-            </details>
-          </div>
-
-          <h3>Step 4. Propose a cheaper plan</h3>
-          <p>Exam questions often ask you to improve the plan. The standard improvement is to replace the nested-loop join with a Hash Join (or Sort-Merge Join), whose cost is <code class="inline">3 &times; (M + N)</code> when the smaller table fits the memory condition.</p>
-
-          <div class="query-card">
-            <p class="query-card__question">What is the Hash Join cost, and how much does it save?</p>
+            <p class="query-card__question">What is the Hash Join cost for R and S, and how much does it save over the 5500 Block Nested Loop plan?</p>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
 <pre class="state">Hash Join cost = 3 &times; (M + N)
-              = 3 &times; (1000 + 750)
-              = 3 &times; 1750
-              = 5250 I/Os</pre>
-                <p>That is about 75,750 / 5250 &asymp; 14 times cheaper than the Block Nested Loop plan. The partitioning phase reads and writes both tables (2(M+N)), and the matching phase reads both once more (M+N), giving 3(M+N) in total.</p>
+              = 3 &times; (1000 + 500)
+              = 3 &times; 1500
+              = 4500 I/Os</pre>
+                <p>That is cheaper than the best Block Nested Loop plan (5500), and far cheaper than Page Nested Loops (about 500,000) or Simple Nested Loops (about 50 million). On a final, this is the kind of optimization you propose after costing the original plan.</p>
               </div>
             </details>
           </div>
-
-          <p class="task">This is the same shape as Problem 2 on a CS460 final: convert statistics to pages, cost a Block Nested Loop plan, then propose a Hash Join that is roughly ten times cheaper or more.</p>
 
         </div>
       </section>
