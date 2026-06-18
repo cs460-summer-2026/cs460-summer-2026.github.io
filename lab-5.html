@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Boston University CS460 Introduction to Database Systems, Summer 2026, Lab 5: Counting disk I/Os for external sorting and join algorithms.">
-  <title>Lab 5: Counting Disk I/Os | CS460</title>
+  <meta name="description" content="Boston University CS460 Introduction to Database Systems, Summer 2026, Lab 5: estimating I/O cost for external sorting and join algorithms.">
+  <title>Lab 5: Estimating I/O Cost | CS460</title>
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
@@ -18,7 +18,7 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
 
-  <meta property="og:title" content="Lab 5: Counting Disk I/Os | CS460">
+  <meta property="og:title" content="Lab 5: Estimating I/O Cost | CS460">
   <meta property="og:type" content="article">
 </head>
 
@@ -63,7 +63,7 @@
   </nav>
 
   <header class="hero">
-    <h1 class="hero__title hero__title--lab">Lab 5<span class="hero__subtitle">Counting Disk I/Os</span></h1>
+    <h1 class="hero__title hero__title--lab">Lab 5<span class="hero__subtitle">Estimating I/O Cost</span></h1>
   </header>
 
   <main id="main" class="lab-layout">
@@ -71,11 +71,12 @@
     <aside class="toc" aria-label="Table of contents">
       <p class="toc__label">On this page</p>
       <ul class="toc__list">
-        <li><a href="#bigidea">0. The one big idea</a></li>
+        <li><a href="#cost-model">0. The Cost Model</a></li>
         <li><a href="#sort-theory">1. External Sorting</a></li>
-        <li><a href="#sort-exercise">&#8627; Your turn</a></li>
+        <li><a href="#sort-exercise">&#8627; Exercise</a></li>
         <li><a href="#join-theory">2. Join Costs</a></li>
-        <li><a href="#join-exercise">&#8627; Your turn</a></li>
+        <li><a href="#join-exercise">&#8627; Exercise</a></li>
+        <li><a href="#exam-exercise">3. Exam-style Problem</a></li>
         <li><a href="#mistakes">Common mistakes</a></li>
       </ul>
     </aside>
@@ -85,37 +86,40 @@
       <details class="toc-mobile">
         <summary>On this page ▾</summary>
         <ul>
-          <li><a href="#bigidea">0. The one big idea</a></li>
+          <li><a href="#cost-model">0. The Cost Model</a></li>
           <li><a href="#sort-theory">1. External Sorting</a></li>
-          <li><a href="#sort-exercise">Your turn</a></li>
+          <li><a href="#sort-exercise">Exercise</a></li>
           <li><a href="#join-theory">2. Join Costs</a></li>
-          <li><a href="#join-exercise">Your turn</a></li>
+          <li><a href="#join-exercise">Exercise</a></li>
+          <li><a href="#exam-exercise">3. Exam-style Problem</a></li>
           <li><a href="#mistakes">Common mistakes</a></li>
         </ul>
       </details>
 
       <!--============================================
-           0. THE ONE BIG IDEA
+           0. THE COST MODEL
            ============================================ -->
-      <section id="bigidea" class="lab-section">
-        <h2 class="section-title">0. The one big idea</h2>
+      <section id="cost-model" class="lab-section">
+        <h2 class="section-title">0. The Cost Model</h2>
         <div class="section-body">
 
-          <p>This whole lab is just one idea repeated:</p>
+          <p>Every cost in this lab is measured the same way:</p>
 
-<pre class="state">Cost of an operation  =  how many PAGES it reads or writes from disk.
+<pre class="state">Cost of an operation  =  number of PAGES it reads or writes from disk.
 
   read 1 page  = 1 I/O
   write 1 page = 1 I/O</pre>
 
-          <p>Reading from disk is the slow part of a database, much slower than anything the CPU does. So when we ask "how expensive is this query?" we just count page reads and writes and ignore everything else. Every number in this lab is a count of pages. That's the entire game.</p>
+          <p>Reading and writing disk pages is far slower than any work the CPU does, so it dominates the running time of a query. For that reason we estimate cost by counting page reads and writes and ignore CPU time. Every figure in this lab is a count of pages.</p>
 
-          <p>Two words we'll use the whole time:</p>
+          <p>Two symbols are used throughout:</p>
 
           <ul>
-            <li><strong>N</strong> or <strong>M</strong> = the size of a table, measured in <em>pages</em> (not rows).</li>
-            <li><strong>B</strong> = the size of our buffer pool, i.e. how many pages of memory we get to use at once.</li>
+            <li><strong>N</strong> or <strong>M</strong>: the size of a table, measured in <em>pages</em> (not rows).</li>
+            <li><strong>B</strong>: the size of the buffer pool, that is, how many pages of memory are available at one time.</li>
           </ul>
+
+          <p>When a problem gives you a table as a number of tuples instead of pages, your first step is always to convert tuples into pages. Section 3 shows how.</p>
 
         </div>
       </section>
@@ -127,24 +131,24 @@
         <h2 class="section-title">1. External Sorting</h2>
         <div class="section-body">
 
-          <h3>The situation</h3>
+          <h3>The problem</h3>
 
-          <p>We need to sort a table, but it is way bigger than memory. We can't load it all in and call sort(). So we sort it in <strong>passes</strong>, reading and writing the file to disk one pass at a time.</p>
+          <p>We need to sort a table that is larger than memory, so it cannot be loaded in full and sorted at once. Instead we sort it in <strong>passes</strong>, reading and writing the whole file to disk on each pass.</p>
 
           <ul>
-            <li><strong>Pass 0:</strong> read the file B pages at a time, sort each chunk in memory, write it back out. Each sorted chunk is called a <strong>run</strong>.</li>
-            <li><strong>Later passes:</strong> merge runs together into bigger runs. With B buffers we can merge <strong>B&minus;1</strong> runs at once (1 buffer is saved for the output). We keep merging until there is just one run left, which is the fully sorted file.</li>
+            <li><strong>Pass 0:</strong> read the file B pages at a time, sort each chunk in memory, and write it back. Each sorted chunk is called a <strong>run</strong>.</li>
+            <li><strong>Later passes:</strong> merge runs into larger runs. With B buffers we can merge <strong>B&minus;1</strong> runs at once, because one buffer is reserved for the output. We keep merging until a single run remains, which is the sorted file.</li>
           </ul>
 
-          <p>Two facts are all you need:</p>
+          <p>Two formulas are all you need:</p>
 
 <pre class="state">number of passes = 1 + &lceil; log(B-1) of &lceil;N/B&rceil; &rceil;
 
 total cost = 2N &times; (number of passes)</pre>
 
-          <p>Why <code class="inline">2N</code> per pass? Because every pass reads all N pages once and writes all N pages once. Read + write = 2N. Simple.</p>
+          <p>The cost is <code class="inline">2N</code> per pass because every pass reads all N pages once and writes all N pages once, so read plus write equals 2N.</p>
 
-          <p>Don't memorize the log formula yet. Just watch the example below count passes by hand, then the formula will feel obvious.</p>
+          <p>You do not need to memorize the log formula. The worked example below counts the passes by hand, and the formula simply confirms that count.</p>
 
           <h3>Worked example</h3>
 
@@ -155,42 +159,41 @@ total cost = 2N &times; (number of passes)</pre>
         (we now have 22 sorted runs on disk)
 
 Pass 1: merge B-1 = 4 runs at a time.
-        22 / 4 = 5.5  &rarr;  6 bigger runs.
+        22 / 4 = 5.5  &rarr;  6 larger runs.
 
 Pass 2: merge 4 at a time again.
         6 / 4 = 1.5  &rarr;  2 runs.
 
 Pass 3: merge those 2 runs into 1.
-        DONE. 1 fully sorted run.</pre>
+        DONE. 1 sorted run.</pre>
 
-          <p>Count the passes: 0, 1, 2, 3 &rarr; that's <strong>4 passes</strong>.</p>
+          <p>Count the passes: 0, 1, 2, 3, which is <strong>4 passes</strong>.</p>
 
 <pre class="state">Check with the formula:
   1 + &lceil; log4 of &lceil;108/5&rceil; &rceil;
 = 1 + &lceil; log4 of 22 &rceil;
-= 1 + 3            (because 4&sup3; = 64 &ge; 22, but 4&sup2; = 16 &lt; 22)
+= 1 + 3            (4&sup3; = 64 &ge; 22, but 4&sup2; = 16 &lt; 22)
 = 4 passes   &#10003;
 
 Total I/O cost = 2N &times; passes
               = 2 &times; 108 &times; 4
               = 864 I/Os.</pre>
 
-          <p>That's the whole topic. Count how many passes it takes to get down to 1 run, then multiply <code class="inline">2N &times; passes</code>.</p>
+          <p>That is the whole method: count how many passes it takes to reach one run, then multiply <code class="inline">2N &times; passes</code>.</p>
 
         </div>
       </section>
 
       <!-- ============================================
-           1. EXTERNAL SORTING - YOUR TURN
+           1. EXTERNAL SORTING - EXERCISE
            ============================================ -->
       <section id="sort-exercise" class="lab-section lab-section--alt">
-        <h2 class="section-title">Your turn: external sorting</h2>
+        <h2 class="section-title">Exercise: external sorting</h2>
         <div class="section-body">
 
-          <p>Same idea, smaller numbers. Sort a file of <strong>N = 80 pages</strong> with <strong>B = 5 buffer pages</strong>.</p>
+          <p>Same method, smaller numbers. Sort a file of <strong>N = 80 pages</strong> with <strong>B = 5 buffer pages</strong>.</p>
 
           <div class="query-card">
-            <span class="query-card__label">Try first</span>
             <p class="query-card__question">How many runs does Pass 0 make?</p>
             <details>
               <summary>Show answer</summary>
@@ -202,7 +205,6 @@ Total I/O cost = 2N &times; passes
           </div>
 
           <div class="query-card">
-            <span class="query-card__label">Try first</span>
             <p class="query-card__question">How many total passes? (keep merging 4 at a time until 1 run)</p>
             <details>
               <summary>Show answer</summary>
@@ -210,14 +212,13 @@ Total I/O cost = 2N &times; passes
 <pre class="state">Pass 0: 16 runs
 Pass 1: 16 / 4 = 4 runs
 Pass 2: 4 / 4  = 1 run  &rarr; DONE</pre>
-                <p>Passes 0, 1, 2 &rarr; <strong>3 passes</strong>.</p>
+                <p>Passes 0, 1, 2, which is <strong>3 passes</strong>.</p>
                 <p>Formula check: <code class="inline">1 + &lceil;log4 of 16&rceil; = 1 + 2 = 3</code>. &#10003;</p>
               </div>
             </details>
           </div>
 
           <div class="query-card">
-            <span class="query-card__label">Try first</span>
             <p class="query-card__question">What is the total I/O cost?</p>
             <details>
               <summary>Show answer</summary>
@@ -237,31 +238,31 @@ Pass 2: 4 / 4  = 1 run  &rarr; DONE</pre>
         <h2 class="section-title">2. Join Costs</h2>
         <div class="section-body">
 
-          <p>A <strong>join</strong> matches rows from two tables that share a value (for example, match each reservation to the sailor who made it). There are several ways to do it, and they cost wildly different amounts of I/O. We'll count the cost of three of them on the same two tables.</p>
+          <p>A <strong>join</strong> matches rows from two tables that share a value, for example matching each reservation to the sailor who made it. There are several algorithms for it, and they differ greatly in I/O cost. We count the cost of three of them on the same two tables.</p>
 
-          <h3>Our two tables (memorize these numbers)</h3>
+          <h3>The two tables</h3>
 
 <pre class="state">R = Reserves :  M = 1000 pages,  100 rows per page
 S = Sailors  :  N =  500 pages,   80 rows per page</pre>
 
-          <p>We are joining R and S. In all three methods below, one table is the <strong>outer</strong> (the one in the outer loop) and the other is the <strong>inner</strong> (re-scanned again and again).</p>
+          <p>We are joining R and S. In each method below, one table is the <strong>outer</strong> (the outer loop) and the other is the <strong>inner</strong> (scanned again for each step of the outer loop).</p>
 
-          <h3>Method 1 &mdash; Simple Nested Loops (the slow one)</h3>
+          <h3>Method 1: Simple Nested Loops</h3>
 
-          <p>For <em>every single row</em> of the outer table, scan the <em>entire</em> inner table. Notice it says every <strong>row</strong>, not every page &mdash; that's what makes it terrible.</p>
+          <p>For every <em>row</em> of the outer table, scan the entire inner table. Note that it is every row, not every page, which is why the cost is so high.</p>
 
 <pre class="state">Cost = (rows in outer) &times; (pages in inner) + (pages in outer)
 
 With R outer:
   rows in R = 1000 pages &times; 100 rows = 100,000 rows
   Cost = 100,000 &times; 500 + 1000
-       = 50,001,000 I/Os    &larr; about 50 million. Awful.</pre>
+       = 50,001,000 I/Os    (about 50 million)</pre>
 
-          <p>Fifty million page reads. This is the version we never want.</p>
+          <p>About fifty million page reads. This version is never used in practice.</p>
 
-          <h3>Method 2 &mdash; Page Nested Loops (a bit smarter)</h3>
+          <h3>Method 2: Page Nested Loops</h3>
 
-          <p>Same idea, but loop over <strong>pages</strong> instead of rows. For every page of the outer, scan all pages of the inner.</p>
+          <p>The same idea, but the loops run over <strong>pages</strong> instead of rows. For every page of the outer, scan all pages of the inner.</p>
 
 <pre class="state">Cost = (pages in outer) &times; (pages in inner) + (pages in outer)
 
@@ -271,17 +272,17 @@ With R outer:
 With S outer (smaller table outside):
   Cost = 500 &times; 1000 + 500 = 500,500 I/Os</pre>
 
-          <p>From 50 million down to ~500 thousand just by looping over pages, not rows. And putting the <strong>smaller table on the outside</strong> is slightly better. (Good rule of thumb: smaller relation outer.)</p>
+          <p>Looping over pages instead of rows brings the cost from about 50 million down to about 500 thousand. Putting the smaller table on the outside is slightly cheaper. A useful rule of thumb is: smaller relation outer.</p>
 
-          <h3>Method 3 &mdash; Block Nested Loops (the practical one)</h3>
+          <h3>Method 3: Block Nested Loops</h3>
 
-          <p>The trick: use most of our memory to hold a big <strong>block</strong> of the outer table at once. If we can hold 100 outer pages in memory, then we only scan the inner table once per <em>block of 100 pages</em>, instead of once per single page. Far fewer scans of the inner.</p>
+          <p>Use most of the buffer to hold a large <strong>block</strong> of the outer table at once. If the block holds 100 outer pages, the inner table is scanned once per block of 100 pages rather than once per single page, which reduces the number of inner scans.</p>
 
 <pre class="state">Cost = (pages in outer) + (number of outer blocks) &times; (pages in inner)
 
 number of outer blocks = ceil( pages in outer / block size )</pre>
 
-          <p>Say our block holds 100 pages of the outer table.</p>
+          <p>Suppose the block holds 100 pages of the outer table.</p>
 
 <pre class="state">With R outer (1000 pages, block = 100):
   number of blocks = 1000 / 100 = 10
@@ -291,16 +292,16 @@ With S outer (500 pages, block = 100):
   number of blocks = 500 / 100 = 5
   Cost = 500 + 5 &times; 1000 = 5500 I/Os</pre>
 
-          <p>From 500,000 down to ~6000. Same data, same join &mdash; just a smarter use of memory. This is why the buffer pool size B matters so much: a bigger block means fewer inner scans.</p>
+          <p>The cost drops from about 500,000 to about 6000 on the same join. This is why the buffer size B matters: a larger block means fewer scans of the inner table.</p>
 
         </div>
       </section>
 
       <!-- ============================================
-           2. JOIN COSTS - YOUR TURN
+           2. JOIN COSTS - EXERCISE
            ============================================ -->
       <section id="join-exercise" class="lab-section lab-section--alt">
-        <h2 class="section-title">Your turn: join costs</h2>
+        <h2 class="section-title">Exercise: join costs</h2>
         <div class="section-body">
 
           <p>Same two tables. Reminder:</p>
@@ -309,7 +310,6 @@ With S outer (500 pages, block = 100):
 S = Sailors  :  N =  500 pages,   80 rows per page</pre>
 
           <div class="query-card">
-            <span class="query-card__label">Try first</span>
             <p class="query-card__question">Page Nested Loops with <strong>S as the outer</strong> table. What is the cost?</p>
             <details>
               <summary>Show answer</summary>
@@ -321,29 +321,129 @@ S = Sailors  :  N =  500 pages,   80 rows per page</pre>
           </div>
 
           <div class="query-card">
-            <span class="query-card__label">Try first</span>
             <p class="query-card__question">Block Nested Loops with <strong>R as the outer</strong> and a block that holds <strong>200 pages</strong>. What is the cost?</p>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
 <pre class="state">number of blocks = 1000 / 200 = 5
 Cost = 1000 + 5 &times; 500 = 1000 + 2500 = 3500 I/Os</pre>
-                <p>Notice: a bigger block (200 instead of 100) made it cheaper than the 6000 we got earlier. More memory &rarr; fewer inner scans &rarr; lower cost.</p>
+                <p>A larger block (200 instead of 100) gives a lower cost than the 6000 from earlier. More memory means fewer inner scans, which means lower cost.</p>
               </div>
             </details>
           </div>
 
           <div class="query-card">
-            <span class="query-card__label">Try first</span>
             <p class="query-card__question">Which is cheaper for Block Nested Loops: R outer or S outer (both with a 100-page block)? Why?</p>
             <details>
               <summary>Show answer</summary>
               <div class="answer">
-                <p>R outer = 6000, S outer = 5500. <strong>S outer is cheaper.</strong></p>
-                <p>The smaller table (S) makes fewer blocks, so the bigger table only gets scanned a few times. Smaller relation outer wins again.</p>
+                <p>R outer = 6000, S outer = 5500, so <strong>S outer is cheaper</strong>.</p>
+                <p>The smaller table (S) forms fewer blocks, so the larger table is scanned fewer times. Smaller relation outer wins again.</p>
               </div>
             </details>
           </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================
+           3. EXAM-STYLE PROBLEM
+           ============================================ -->
+      <section id="exam-exercise" class="lab-section lab-section--alt">
+        <h2 class="section-title">3. Exam-style Problem</h2>
+        <div class="section-body">
+
+          <p>Final-exam join questions do not hand you the page counts. They give you table statistics and a page size, and you convert them to pages yourself before costing the plan. This exercise walks through that full process on a small schema.</p>
+
+          <h3>The setup</h3>
+
+<pre class="state">Schema:
+  Employee(eid: integer, name: char(20), dept: char(10))
+  Project (pid: integer, eid: integer, hours: integer)
+
+Sizes:
+  integer = 4 bytes,  char(n) = n bytes
+  page size = 100 bytes
+  buffer pool B = 12 pages
+
+Statistics:
+  Employee : 2000 tuples
+  Project  : 6000 tuples
+  eid is the primary key of Employee and a foreign key in Project</pre>
+
+          <p>We want the cost of joining Employee and Project on <code class="inline">eid</code> using a Block Nested Loop Join.</p>
+
+          <h3>Step 1. Tuple size, then tuples per page</h3>
+          <p>Add up the bytes in one tuple, then see how many whole tuples fit in a 100-byte page. A tuple cannot be split across pages, so round the tuples-per-page <em>down</em>.</p>
+
+          <div class="query-card">
+            <p class="query-card__question">How many tuples fit on one page for each table?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+<pre class="state">Employee tuple = 4 (eid) + 20 (name) + 10 (dept) = 34 bytes
+  tuples per page = floor(100 / 34) = floor(2.94) = 2
+
+Project tuple  = 4 (pid) + 4 (eid) + 4 (hours)   = 12 bytes
+  tuples per page = floor(100 / 12) = floor(8.33) = 8</pre>
+                <p>Round down because a partial tuple cannot be stored on a page.</p>
+              </div>
+            </details>
+          </div>
+
+          <h3>Step 2. Pages per table</h3>
+          <p>Divide total tuples by tuples per page, and round <em>up</em> (a leftover handful of tuples still needs one more page).</p>
+
+          <div class="query-card">
+            <p class="query-card__question">How many pages does each table occupy?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+<pre class="state">Employee : 2000 / 2 = 1000 pages   &rarr;  call this M = 1000
+Project  : 6000 / 8 = 750  pages   &rarr;  call this N =  750</pre>
+                <p>Now the problem looks like the join problems from Section 2, just with our own page counts.</p>
+              </div>
+            </details>
+          </div>
+
+          <h3>Step 3. Block Nested Loop cost</h3>
+          <p>Use the smaller table as the outer, with a block that holds B&minus;2 = 10 pages (one buffer for the inner, one for the output).</p>
+
+          <div class="query-card">
+            <p class="query-card__question">Put Project (the smaller table, 750 pages) as the outer with a block of 10 pages. What is the cost?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+<pre class="state">number of blocks = ceil(750 / 10) = 75
+Cost = (outer pages) + (blocks) &times; (inner pages)
+     = 750 + 75 &times; 1000
+     = 750 + 75,000
+     = 75,750 I/Os</pre>
+                <p>If instead Employee (1000 pages) were the outer:
+                ceil(1000 / 10) = 100 blocks, cost = 1000 + 100 &times; 750 = 76,000 I/Os.
+                Project outer is slightly cheaper, matching the smaller-relation-outer rule.</p>
+              </div>
+            </details>
+          </div>
+
+          <h3>Step 4. Propose a cheaper plan</h3>
+          <p>Exam questions often ask you to improve the plan. The standard improvement is to replace the nested-loop join with a Hash Join (or Sort-Merge Join), whose cost is <code class="inline">3 &times; (M + N)</code> when the smaller table fits the memory condition.</p>
+
+          <div class="query-card">
+            <p class="query-card__question">What is the Hash Join cost, and how much does it save?</p>
+            <details>
+              <summary>Show answer</summary>
+              <div class="answer">
+<pre class="state">Hash Join cost = 3 &times; (M + N)
+              = 3 &times; (1000 + 750)
+              = 3 &times; 1750
+              = 5250 I/Os</pre>
+                <p>That is about 75,750 / 5250 &asymp; 14 times cheaper than the Block Nested Loop plan. The partitioning phase reads and writes both tables (2(M+N)), and the matching phase reads both once more (M+N), giving 3(M+N) in total.</p>
+              </div>
+            </details>
+          </div>
+
+          <p class="task">This is the same shape as Problem 2 on a CS460 final: convert statistics to pages, cost a Block Nested Loop plan, then propose a Hash Join that is roughly ten times cheaper or more.</p>
 
         </div>
       </section>
@@ -355,20 +455,20 @@ Cost = 1000 + 5 &times; 500 = 1000 + 2500 = 3500 I/Os</pre>
         <h2 class="section-title">Common mistakes</h2>
         <div class="section-body">
 
-          <h3>"I counted rows when I should have counted pages"</h3>
-          <p>Cost is measured in <strong>pages</strong> (I/Os), not rows. The only place rows show up is Simple Nested Loops, where the outer loop runs once per row &mdash; and that is exactly why it costs millions.</p>
+          <h3>Counting rows when the cost is in pages</h3>
+          <p>Cost is measured in <strong>pages</strong> (I/Os), not rows. The only place rows appear is Simple Nested Loops, where the outer loop runs once per row, which is exactly why that method costs millions.</p>
 
-          <h3>"I forgot to round up"</h3>
-          <p>You always round <em>up</em> when counting runs or blocks, because a leftover half-page still needs a whole pass / a whole block. <code class="inline">22/4 = 5.5</code> means <strong>6</strong> runs, never 5.</p>
+          <h3>Rounding the wrong way</h3>
+          <p>Tuples per page rounds <em>down</em>, because a partial tuple cannot fit on a page. Pages per table, runs, and blocks all round <em>up</em>, because a leftover remainder still needs a whole page, run, or block. For example, <code class="inline">22/4 = 5.5</code> means 6 runs, never 5.</p>
 
-          <h3>"I put the wrong table on the outside"</h3>
-          <p>For nested-loop joins, the <strong>smaller</strong> table goes on the outside. Fewer outer pages (or blocks) means fewer scans of the inner table.</p>
+          <h3>Putting the wrong table on the outside</h3>
+          <p>For nested-loop joins, the <strong>smaller</strong> table goes on the outside. Fewer outer pages or blocks means fewer scans of the inner table.</p>
 
-          <h3>"My pass count is off by one"</h3>
-          <p>Pass 0 counts as a pass. Count 0, 1, 2, 3&hellip; until you are down to a single run. If the file fits in B pages from the start, that's just Pass 0 = 1 pass.</p>
+          <h3>Off-by-one on the pass count</h3>
+          <p>Pass 0 counts as a pass. Count 0, 1, 2, 3, and so on, until a single run remains. If the file already fits in B pages, that is Pass 0 only, so 1 pass.</p>
 
-          <h3>"I used B instead of B&minus;1 when merging"</h3>
-          <p>Pass 0 uses all B buffers to sort. But every <em>merge</em> pass keeps one buffer for output, so it merges only <strong>B&minus;1</strong> runs at a time.</p>
+          <h3>Using B instead of B&minus;1 when merging</h3>
+          <p>Pass 0 uses all B buffers to sort. Every <em>merge</em> pass keeps one buffer for output, so it merges only <strong>B&minus;1</strong> runs at a time. For Block Nested Loops, the outer block holds B&minus;2 pages, since one buffer is for the inner and one for the output.</p>
 
         </div>
       </section>
